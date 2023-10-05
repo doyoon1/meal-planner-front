@@ -16,7 +16,7 @@ export default function HomePage({featuredRecipe, newRecipes}) {
 }
 
 export async function getServerSideProps() {
-  const featuredRecipeId = '6513fd4aa017396115e99456';
+  const featuredRecipeId = '651d6e71998c15e700e5cf33';
   await mongooseConnect();
   const featuredRecipe = await Recipe.findById(featuredRecipeId);
   const newRecipes = await Recipe.find({}, null, {sort: {'_id':-1}, limit:12});
