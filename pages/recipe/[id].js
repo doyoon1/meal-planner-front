@@ -40,7 +40,7 @@ const TableHeader = styled.th`
 const TableData = styled.td`
     padding: 8px;
     border-bottom: 1px solid #ccc;
-    color: #888;
+    color: #555;
     font-size: 1rem;
 `;
 
@@ -54,6 +54,10 @@ const Procedure = styled.p`
     text-align: left;
     font-size: 2.2rem;
     font-weight: normal;
+`;
+
+const Steps = styled.p`
+    color: #666;
 `;
 
 export default function RecipePage({ recipe }) {
@@ -87,8 +91,8 @@ export default function RecipePage({ recipe }) {
 
     const procedureSteps = recipe.procedure.map((step, index) => (
         <div key={index}>
-            <p><strong>Step {index + 1}:</strong></p>
-            <p>{step}</p>
+            <p><strong>Step {index + 1}</strong></p>
+            <Steps>{step}</Steps>
         </div>
     ));
 
@@ -100,7 +104,7 @@ export default function RecipePage({ recipe }) {
             <Center>
                 <div>
                     <CategoryWrapper>
-                        {categoryNames && <p>{categoryNames}</p>}
+                        <p>{categoryNames}</p>
                     </CategoryWrapper>
                     <Title>{recipe.title}</Title>
                     <p>{recipe.description}</p>

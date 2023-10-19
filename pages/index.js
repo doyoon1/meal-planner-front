@@ -16,10 +16,18 @@ export default function HomePage({featuredRecipe, newRecipes}) {
 }
 
 export async function getServerSideProps() {
-  const featuredRecipeId = '651d6e71998c15e700e5cf33';
   await mongooseConnect();
-  const featuredRecipe = await Recipe.findById(featuredRecipeId);
-  const newRecipes = await Recipe.find({}, null, {sort: {'_id':-1}, limit:12});
+
+  // Query MongoDB to find the featured recipe with "featured" field set to true
+  const featuredRecipe = await Recipe.findOne({ featured: true });
+
+  if (!featuredRecipe) {
+    return {
+      notFound: true, // Handle the case where no featured recipe is found
+    };
+  }
+
+  const newRecipes = await Recipe.find({}, null, { sort: { _id: -1 }, limit: 12 });
   return {
     props: {
       featuredRecipe: JSON.parse(JSON.stringify(featuredRecipe)),
