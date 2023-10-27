@@ -94,7 +94,7 @@ export default function Header() {
             <StyledHeader>
                 <Center>
                     <Wrapper>
-                        <Logo href={'/'}>Mealmate</Logo>
+                        <Logo href={'/'}>MealGrub</Logo>
                             <StyledNav mobileNavActive={mobileNavActive}>
                                 <NavLink href={'/'} isActive={router.pathname === '/'}>Home</NavLink>
                                 <NavLink href={'/recipes'} isActive={router.pathname === '/recipes'}>Recipes</NavLink>

@@ -10,7 +10,7 @@ import Button from "@/components/Button";
 import BagIcon from "@/components/icons/BagIcon";
 import PrintIcon from "@/components/icons/PrintIcon";
 import { BagContext } from "@/components/BagContext";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 
 const Title = styled.h1`
     font-size: 3em;
@@ -64,8 +64,31 @@ export default function RecipePage({ recipe }) {
     const { addRecipe } = useContext(BagContext);
     const categoryArray = Array.isArray(recipe.category) ? recipe.category : [recipe.category];
     const categoryNames = categoryArray.map((cat) => cat?.name).join(", ");
+    const [servings, setServings] = useState(recipe.servings);
+    const originalServings = recipe.servings; 
+    const originalIngredients = recipe.ingredients; 
 
-    const ingredientRows = recipe.ingredients.map((ingredient, index) => (
+    const decreaseServings = () => {
+        if (servings > 1) {
+            setServings(servings - 1);
+        }
+    };
+
+    const increaseServings = () => {
+        setServings(servings + 1);
+    };
+
+    // Calculate the ratio of servings change
+    const servingsRatio = servings / originalServings;
+
+    // Update ingredient measurements based on the ratio
+    const updatedIngredients = originalIngredients.map((ingredient) => ({
+        name: ingredient.name,
+        quantity: (ingredient.quantity * servingsRatio).toFixed(2),
+        measurement: ingredient.measurement,
+    }));
+
+    const ingredientRows = updatedIngredients.map((ingredient, index) => (
         <tr
             key={index}
             style={{
@@ -95,7 +118,7 @@ export default function RecipePage({ recipe }) {
             <Steps>{step}</Steps>
         </div>
     ));
-
+    
     return (
         <>
             <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -117,6 +140,11 @@ export default function RecipePage({ recipe }) {
                         </Button>
                     </ButtonWrapper>
                     <div>
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                <button onClick={decreaseServings}>-</button>
+                                <p>Servings: {servings}</p>
+                                <button onClick={increaseServings}>+</button>
+                            </div>
                         <IngredientTable>
                             <thead>
                             <tr>
@@ -124,7 +152,7 @@ export default function RecipePage({ recipe }) {
                             </tr>
                             </thead>
                             <tbody>
-                            {ingredientRows}
+                                {ingredientRows}
                             </tbody>
                         </IngredientTable>
                     </div>
@@ -159,12 +187,12 @@ export async function getServerSideProps(context) {
     }
   
     const recipe = await Recipe.findById(id).populate("category");
-    
+
     recipe.category = Array.isArray(recipe.category) ? recipe.category : [recipe.category];
     
     return {
         props: {
             recipe: JSON.parse(JSON.stringify(recipe)),
         },
-    };
+    };    
 }
