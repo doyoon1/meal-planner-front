@@ -11,6 +11,7 @@ import BagIcon from "@/components/icons/BagIcon";
 import PrintIcon from "@/components/icons/PrintIcon";
 import { BagContext } from "@/components/BagContext";
 import { useContext, useState } from "react";
+import Link from "next/link";
 
 const Title = styled.h1`
     font-size: 3em;
@@ -31,7 +32,7 @@ const IngredientTable = styled.table`
 
 const TableHeader = styled.th`
     text-align: left;
-    padding: 8px;
+    padding-bottom: 8px;
     border-bottom: none;
     font-size: 2.2rem;
     font-weight: normal;
@@ -47,10 +48,20 @@ const TableData = styled.td`
 const CategoryWrapper = styled.div`
     color: #666;
     margin: 0;
+    margin-top: 1rem;
+    a {
+        color: #666;
+        text-decoration: none;
+        &:hover {
+            text-decoration: none;
+            color: #111;
+            transition: all .3s ease;
+        }
+    }
 `;
 
 const Procedure = styled.p`
-    padding: 8px;
+    padding-bottom: 8px;
     text-align: left;
     font-size: 2.2rem;
     font-weight: normal;
@@ -127,7 +138,14 @@ export default function RecipePage({ recipe }) {
             <Center>
                 <div>
                     <CategoryWrapper>
-                        <p>{categoryNames}</p>
+                        {categoryArray.map((cat, index) => (
+                            <span key={cat._id}>
+                            {index > 0 && ', '}
+                            <Link href="/category/[categoryId]" as={`/category/${cat._id}`}>
+                                {cat.name}
+                            </Link>
+                            </span>
+                        ))}
                     </CategoryWrapper>
                     <Title>{recipe.title}</Title>
                     <p>{recipe.description}</p>

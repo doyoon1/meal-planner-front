@@ -3,6 +3,7 @@ import Featured from "@/components/Featured";
 import { Recipe } from "@/models/Recipe";
 import { mongooseConnect } from "@/lib/mongoose";
 import NewRecipes from "@/components/NewRecipes";
+import SearchBar from "@/components/SearchBar";
 
 export default function HomePage({featuredRecipe, newRecipes}) {
   return (
@@ -10,6 +11,7 @@ export default function HomePage({featuredRecipe, newRecipes}) {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet"/>
       <Header />
       <Featured recipe={featuredRecipe} />
+      <SearchBar />
       <NewRecipes recipes={newRecipes} />
     </div>
   );

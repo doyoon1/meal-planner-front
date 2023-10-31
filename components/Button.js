@@ -39,6 +39,7 @@ export const ButtonStyle = css`
         display: block;
         width: 100%;
         font-size: .9rem;
+        border-radius: 16px;
         &:hover {
             background-color: #222;
             border: 1px solid #222;
