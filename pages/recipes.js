@@ -6,10 +6,11 @@ import { Recipe } from "@/models/Recipe";
 import RecipesGrid from "@/components/RecipesGrid";
 import SearchBar from "@/components/RecipeSearch";
 import { useRouter } from "next/router";
+import Link from "next/link";
 
 const Title = styled.h2`
-    font-size: 1.8rem;
-    margin: 30px 0 20px;
+    font-size: 2.5rem;
+    margin: 10px 0 20px;
     font-weight: 500;
 `;
 

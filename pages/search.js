@@ -4,19 +4,40 @@ import { Recipe } from "@/models/Recipe";
 import { mongooseConnect } from "@/lib/mongoose";
 import Header from "@/components/Header";
 import Center from "@/components/Center";
+import styled from "styled-components";
 import SearchResults from "@/components/SearchResults";
 
 export default function SearchPage({ recipes, query }) {
   const router = useRouter();
 
+  const SearchTitle = styled.h1`
+    font-size: 2.5rem;
+    margin: 10px 0 20px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  `;
+
+  const RecipeCount = styled.p`
+    font-size: 1.2rem;
+    margin: 0;
+    color: #777;
+  `;
+
   return (
     <div>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet"/>
-
+        <link
+          href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap"
+          rel="stylesheet"
+        />
         <Header />
-        <SearchBar initialValue={query} /> {/* Pass the query as initialValue */}
+        <SearchBar initialValue={query} />
         <Center>
-            <h1>Search Results for "{query}"</h1>
+            <SearchTitle>
+                Search Results for "{query}"
+                <RecipeCount>{`${recipes.length} recipes`}</RecipeCount>
+            </SearchTitle>
             <SearchResults recipes={recipes} />
         </Center>
     </div>

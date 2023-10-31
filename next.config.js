@@ -4,6 +4,9 @@ const nextConfig = {
   compiler: {
     styledComponents: true,
   },
+  images: {
+    domains: ["next-meal-planner.s3.amazonaws.com"],
+  },
 }
 
 module.exports = nextConfig

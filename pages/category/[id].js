@@ -4,6 +4,22 @@ import Header from '@/components/Header';
 import RecipesGrid from '@/components/RecipesGrid';
 import Category from '@/models/Category';
 import Center from '@/components/Center';
+import styled from 'styled-components';
+
+const CategoryTitle = styled.h1`
+  font-size: 2.5rem;
+  margin: 30px 0 20px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const RecipeCount = styled.p`
+  font-size: 1.2rem;
+  margin: 0;
+  color: #777; /* You can choose the color you prefer */
+`;
 
 export default function CategoryPage({ category, recipes }) {
     return (
@@ -12,7 +28,10 @@ export default function CategoryPage({ category, recipes }) {
             <Header />
             <Center>
               <div>
-                  <h1>{category?.name} Recipes</h1>
+                  <CategoryTitle>
+                      {category?.name}
+                      <RecipeCount>{`${recipes.length} recipes`}</RecipeCount>
+                  </CategoryTitle>
                   <RecipesGrid recipes={recipes} />
               </div>
             </Center>
@@ -25,7 +44,7 @@ export async function getServerSideProps(context) {
     const { id } = context.query;
 
     // Fetch the category based on the categoryId
-    const category = await Category.findById(id); // Make sure to import and define Category model
+    const category = await Category.findById(id); // Make sure to import and define the Category model
 
     // Fetch recipes based on the category ID
     const recipes = await Recipe.find({ category: id }).populate('category').exec();

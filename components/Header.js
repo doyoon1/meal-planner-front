@@ -7,6 +7,7 @@ import { BagContext } from "./BagContext";
 import BagIcon from "./icons/BagIcon";
 import HamburgerIcon from "./icons/Hamburger";
 import axios from "axios";
+import CoursesDropdown from "./Dropdown";
 
 const StyledHeader = styled.header`
     background-color: #111;
@@ -85,131 +86,96 @@ const NavButton = styled.button`
     }
 `;
 
-const Dropdown = styled.div`
-  position: relative;
-  display: inline-block;
-`;
-
-const DropdownLabel = styled.div`
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  color: #aaa;
-  justify-content: space-between;
-`;
-
-const Icon = styled.span`
-    display: flex;
-    align-items: center;
-
-  svg {
-    width: 15px;
-    height: 15px;
-}
-`;
-
-
-const DropdownContent = styled.div`
-  display: ${(props) => (props.visible ? "block" : "none")};
-  position: absolute;
-  background-color: #111;
-  min-width: 160px;
-  z-index: 1;
-  border: 1px solid #eee;
-`;
-
-const DropdownItem = styled.a`
-  color: #aaa;
-  text-decoration: none;
-  display: block;
-  padding: 10px;
-
-  &:hover {
-    background-color: #333;
-    transition: all .3s ease;
-  }
-`;
-
 export default function Header() {
-    const {bagRecipes} = useContext(BagContext);
-    const [mobileNavActive, setMobileNavActive] = useState(false);
-    const [categoryDropdownVisible, setCategoryDropdownVisible] = useState(false);
-    const [categories, setCategories] = useState([])
+    const { bagRecipes } = useContext(BagContext);
     const router = useRouter();
+    const [coursesCategories, setCoursesCategories] = useState([]);
+    const [dietaryCategories, setDietaryCategories] = useState([]);
 
-    const toggleCategoryDropdown = () => {
-        setCategoryDropdownVisible(!categoryDropdownVisible);
+    useEffect(() => {
+    const fetchDietaryCategories = async () => {
+        try {
+        const response = await axios.get("/api/categories");
+        const dietaryParentId = "653e62ebec031412f6316fb6";
+
+        const filteredDietaryCategories = response.data.filter((category) => {
+            return category.parent === dietaryParentId;
+        });
+
+        setDietaryCategories(filteredDietaryCategories);
+        } catch (error) {
+        console.error('Error fetching dietary categories:', error);
+        }
     };
 
-    const fetchCategories = async () => {
-        try {
-          const response = await axios.get("/api/categories");
-          const coursesCategoryId = "653e5850ec031412f6316f77"; 
-          const filteredCategories = response.data.filter((category) => {
-            const categoryParentId = category.parent ? category.parent.toString() : null;
-            
-            return categoryParentId === coursesCategoryId;
-          });
-          setCategories(filteredCategories);
-        } catch (error) {
-          console.error('Error fetching categories:', error);
-        }
-      };
-      
-    useEffect(() => {
-        fetchCategories();
+    fetchDietaryCategories();
     }, []);
 
+    useEffect(() => {
+        const fetchCategories = async () => {
+        try {
+            const response = await axios.get("/api/categories");
+            const coursesCategoryId = "653e5850ec031412f6316f77";
+            
+            // Filter categories with "coursesCategoryId" as their parent
+            const filteredCategories = response.data.filter((category) => {
+            return category.parent === coursesCategoryId;
+            });
+
+            setCoursesCategories(filteredCategories);
+        } catch (error) {
+            console.error('Error fetching categories:', error);
+        }
+        };
+
+        fetchCategories();
+    }, []);
+  
     return (
-        <div>
-            <StyledHeader>
-                <Center>
-                    <Wrapper>
-                        <Logo href={'/'}>MealGrub</Logo>
-                            <StyledNav mobileNavActive={mobileNavActive}>
-                                <NavLink href={'/'} isActive={router.pathname === '/'}>Home</NavLink>
-                                <NavLink href={'/recipes'} isActive={router.pathname === '/recipes'}>Recipes</NavLink>
-                                <NavLink href={'/categories'} isActive={router.pathname === '/categories'}>Categories</NavLink>
-                                <Dropdown
-                                    onMouseEnter={toggleCategoryDropdown}
-                                    onMouseLeave={toggleCategoryDropdown}
-                                >
-                                <DropdownLabel onClick={toggleCategoryDropdown}>
-                                    Courses
-                                    <Icon>
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                                        <path fillRule="evenodd" d="M4.72 3.97a.75.75 0 011.06 0l7.5 7.5a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 01-1.06-1.06L11.69 12 4.72 5.03a.75.75 0 010-1.06zm6 0a.75.75 0 011.06 0l7.5 7.5a.75.75 0 010 1.06l-7.5 7.5a.75.75 0 11-1.06-1.06L17.69 12l-6.97-6.97a.75.75 0 010-1.06z" clipRule="evenodd" />
-                                    </svg>
-                                    </Icon>
-                                </DropdownLabel>
-                                <DropdownContent visible={categoryDropdownVisible}>
-                                    {categories.map((category) => {
-                                        const categoryURL = '/category/' + category._id;
-                                        return (
-                                            <DropdownItem key={category._id} href={categoryURL}>
-                                                {category.name}
-                                            </DropdownItem>
-                                        );
-                                    })}
-                                </DropdownContent>
-                                </Dropdown>
-                                <NavLink href={'/bag'} isActive={router.pathname === '/bag'}>
-                                    <BagInfo>
-                                    <BagIconContainer>
-                                        <BagIcon />
-                                    </BagIconContainer>
-                                    ({bagRecipes.length})
-                                    </BagInfo>
-                                </NavLink>
-                                <NavLink href={'/signup'} isActive={router.pathname === '/signup'}>Sign up</NavLink>
-                                <NavLink href={'/signin'} isActive={router.pathname === '/signin'}>Sign in</NavLink>
-                            </StyledNav>
-                            <NavButton onClick={() => setMobileNavActive(prev => !prev)}>
-                                <HamburgerIcon />
-                            </NavButton>
-                    </Wrapper>
-                </Center>
-            </StyledHeader>
-        </div>
+      <div>
+        <StyledHeader>
+          <Center>
+            <Wrapper>
+              <Logo href={"/"}>MealGrub</Logo>
+              <StyledNav>
+                <NavLink href={"/"} isActive={router.pathname === "/"}>
+                  Home
+                </NavLink>
+                <NavLink
+                  href={"/recipes"}
+                  isActive={router.pathname === "/recipes"}
+                >
+                  Recipes
+                </NavLink>
+                <NavLink
+                  href={"/categories"}
+                  isActive={router.pathname === "/categories"}
+                >
+                  Categories
+                </NavLink>
+                <CoursesDropdown categories={coursesCategories} label="Courses" />
+                <CoursesDropdown categories={dietaryCategories} label="By Diet" />
+                <NavLink href={"/bag"} isActive={router.pathname === "/bag"}>
+                  <BagInfo>
+                    <BagIconContainer>
+                      <BagIcon />
+                    </BagIconContainer>
+                    ({bagRecipes.length})
+                  </BagInfo>
+                </NavLink>
+                <NavLink href={"/signup"} isActive={router.pathname === "/signup"}>
+                  Sign up
+                </NavLink>
+                <NavLink href={"/signin"} isActive={router.pathname === "/signin"}>
+                  Sign in
+                </NavLink>
+              </StyledNav>
+              <NavButton onClick={() => setMobileNavActive((prev) => !prev)}>
+                <HamburgerIcon />
+              </NavButton>
+            </Wrapper>
+          </Center>
+        </StyledHeader>
+      </div>
     );
-}
+  }
