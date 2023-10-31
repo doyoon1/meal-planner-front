@@ -63,10 +63,12 @@ const NavDropdown = ({ categories, label }) => {
     setDropdownVisible(show);
   };
 
+  categories.sort((a, b) => a.name.localeCompare(b.name));
+
   return (
     <DropdownContainer
-      onMouseEnter={() => toggleDropdown(true)} // Open dropdown on mouse enter
-      onMouseLeave={() => toggleDropdown(false)} // Close dropdown on mouse leave
+      onMouseEnter={() => toggleDropdown(true)}
+      onMouseLeave={() => toggleDropdown(false)}
     >
       <DropdownLabel>
         {label}

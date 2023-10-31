@@ -12,6 +12,7 @@ import PrintIcon from "@/components/icons/PrintIcon";
 import { BagContext } from "@/components/BagContext";
 import { useContext, useState } from "react";
 import Link from "next/link";
+import YouTube from 'react-youtube';
 
 const Title = styled.h1`
     font-size: 3em;
@@ -24,60 +25,136 @@ const ButtonWrapper = styled.div`
     gap: 4px;
 `;
 
-const IngredientTable = styled.table`
-    width: 100%;
-    border-collapse: collapse;
-    margin: 40px 0;
-`;
-
-const TableHeader = styled.th`
-    text-align: left;
-    padding-bottom: 8px;
-    border-bottom: none;
-    font-size: 2.2rem;
-    font-weight: normal;
-`;
-
-const TableData = styled.td`
-    padding: 8px;
-    border-bottom: 1px solid #ccc;
-    color: #555;
-    font-size: 1rem;
+const Message = styled.p`
+    color: #FF7F7F;
 `;
 
 const CategoryWrapper = styled.div`
     color: #666;
     margin: 0;
     margin-top: 1rem;
+    font-size: 1.2rem;
     a {
         color: #666;
         text-decoration: none;
         &:hover {
-            text-decoration: none;
+            text-decoration: underline;
             color: #111;
             transition: all .3s ease;
         }
     }
 `;
 
-const Procedure = styled.p`
-    padding-bottom: 8px;
-    text-align: left;
-    font-size: 2.2rem;
-    font-weight: normal;
-`;
-
 const Steps = styled.p`
-    color: #666;
+    color: #555;
 `;
 
+const VideoContainer = styled.div`
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 40px;
+`;
+
+const Label = styled.h2`
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0;
+`;
+
+const List = styled.ul`
+    list-style: none;
+    padding: 0;
+    background-color: #f7f7f7;
+    border-radius: 4px;
+    padding: 16px 16px 2px 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+`;
+
+const ListItem = styled.li`
+    display: grid;
+    margin-bottom: 12px;
+    font-size: 1rem;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #ccc;
+    grid-template-columns: 1fr 3fr;
+    column-gap: 10px;
+    &:last-child {
+        border-bottom: none;
+    }
+`;
+
+const ProcedureContainer = styled.div`
+    margin-top: 20px;
+`;
+
+const ProcedureTitle = styled.h2`
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0;
+`;
+
+const ProcedureStep = styled.div`
+    margin-top: 10px;
+`;
+
+const Step = styled.p`
+    font-style: italic;
+    font-weight: 500;
+`
+
+
+const IngredientsContainer = styled.div`
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+`;
+
+const NutritionalValuesContainer = styled.div`
+    margin-top: 20px;
+`;
+
+const ServingsControls = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 10px;
+    border-radius: 4px;
+`;
+
+const ServingsButton = styled.button`
+    display: flex; 
+    background-color: #555;
+    color: #fff;
+    align-items: center;
+    padding: 2px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+    svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    &:hover {
+        background-color: #111;
+    }
+`;
+
+const ServingsLabel = styled.p`
+    font-size: 16px;
+    margin: 0px 16px;
+    color: #333;
+`;
 export default function RecipePage({ recipe }) {
     const { addRecipe } = useContext(BagContext);
     const categoryArray = Array.isArray(recipe.category) ? recipe.category : [recipe.category];
-    const categoryNames = categoryArray.map((cat) => cat?.name).join(", ");
     const [servings, setServings] = useState(recipe.servings);
-    const originalServings = recipe.servings; 
-    const originalIngredients = recipe.ingredients; 
+    const originalServings = recipe.servings;
+    const originalIngredients = recipe.ingredients;
+    const servingsChanged = servings !== originalServings;
 
     const decreaseServings = () => {
         if (servings > 1) {
@@ -99,37 +176,20 @@ export default function RecipePage({ recipe }) {
         measurement: ingredient.measurement,
     }));
 
-    const ingredientRows = updatedIngredients.map((ingredient, index) => (
-        <tr
-            key={index}
-            style={{
-                backgroundColor: index % 2 === 0 ? "#f0f0f0" : "#ffffff",
-            }}
-        >
-            <TableData>{ingredient.quantity} {ingredient.measurement}</TableData>
-            <TableData>{ingredient.name}</TableData>
-        </tr>
-    ));
-
-    const nutriValueRows = recipe.nutriValue.map((nutriItem, index) => (
-        <tr
-            key={index}
-            style={{
-                backgroundColor: index % 2 === 0 ? "#f0f0f0" : "#ffffff",
-            }}
-        >
-            <TableData>{nutriItem.name}</TableData>
-            <TableData>{nutriItem.value}</TableData>
-        </tr>
+    const nutriValueList = recipe.nutriValue.map((nutriItem, index) => (
+        <ListItem key={index}>
+            <span>{nutriItem.name}:</span>
+            <span>{nutriItem.value}</span>
+        </ListItem>
     ));
 
     const procedureSteps = recipe.procedure.map((step, index) => (
-        <div key={index}>
-            <p><strong>Step {index + 1}</strong></p>
-            <Steps>{step}</Steps>
-        </div>
-    ));
-    
+        <ProcedureStep key={index}>
+          <Step>Step {index + 1}</Step>
+          <Steps>{step}</Steps>
+        </ProcedureStep>
+      ));
+
     return (
         <>
             <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -140,10 +200,10 @@ export default function RecipePage({ recipe }) {
                     <CategoryWrapper>
                         {categoryArray.map((cat, index) => (
                             <span key={cat._id}>
-                            {index > 0 && ', '}
-                            <Link href="/category/[categoryId]" as={`/category/${cat._id}`}>
-                                {cat.name}
-                            </Link>
+                                {index > 0 && ', '}
+                                <Link href="/category/[categoryId]" as={`/category/${cat._id}`}>
+                                    {cat.name}
+                                </Link>
                             </span>
                         ))}
                     </CategoryWrapper>
@@ -158,38 +218,61 @@ export default function RecipePage({ recipe }) {
                         </Button>
                     </ButtonWrapper>
                     <div>
-                            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                                <button onClick={decreaseServings}>-</button>
-                                <p>Servings: {servings}</p>
-                                <button onClick={increaseServings}>+</button>
+                        <IngredientsContainer>
+                            <Label>Ingredients</Label>
+                            <ServingsControls>
+                                <ServingsButton onClick={decreaseServings}>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                                    <path fillRule="evenodd" d="M4 10a.75.75 0 01.75-.75h10.5a.75.75 0 010 1.5H4.75A.75.75 0 014 10z" clipRule="evenodd" />
+                                </svg>
+                                </ServingsButton>
+                                <ServingsLabel>{servings} Servings</ServingsLabel>
+                                <ServingsButton onClick={increaseServings}>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                                    <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                                </svg>
+
+                                </ServingsButton>
+                            </ServingsControls>
+                        </IngredientsContainer>
+                        {servingsChanged && (
+                            <div>
+                                <Message>
+                                    Please note that this recipe is originally designed for {originalServings} servings.
+                                    Adjust quantities and cooking times as needed for {servings} servings.
+                                </Message>
                             </div>
-                        <IngredientTable>
-                            <thead>
-                            <tr>
-                                <TableHeader colSpan="2">Ingredients</TableHeader>
-                            </tr>
-                            </thead>
-                            <tbody>
-                                {ingredientRows}
-                            </tbody>
-                        </IngredientTable>
+                            )}
+                        <List>
+                                {updatedIngredients.map((ingredient, index) => (
+                                    <ListItem key={index}>
+                                        <span>{ingredient.quantity} {ingredient.measurement}</span>
+                                        <span>{ingredient.name}</span>
+                                    </ListItem>
+                                ))}
+                        </List>
                     </div>
+                    {recipe.videoLink && (
+                        <VideoContainer>
+                            <Label>How to Cook {recipe.title}</Label>
+                            <YouTube
+                                videoId={recipe.videoLink}
+                                opts={{ width: '800', height: '450' }}
+                            />
+                        </VideoContainer>
+                    )}
                     <div>
-                        <Procedure>Procedure</Procedure>
-                        {procedureSteps}
+                        <ProcedureContainer>
+                            <ProcedureTitle>Procedure</ProcedureTitle>
+                            {procedureSteps}
+                        </ProcedureContainer>
                     </div>
-                    <div>
-                        <IngredientTable>
-                            <thead>
-                                <tr>
-                                    <TableHeader colSpan="2">Nutritional values</TableHeader>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {nutriValueRows}
-                            </tbody>
-                        </IngredientTable>
-                    </div>
+                    <NutritionalValuesContainer>
+                        <Label>Nutritional Values</Label>
+                        <List>
+                            {nutriValueList}
+                        </List>
+                    </NutritionalValuesContainer>
                 </div>
             </Center>
         </>
@@ -199,18 +282,18 @@ export default function RecipePage({ recipe }) {
 export async function getServerSideProps(context) {
     await mongooseConnect();
     const { id } = context.query;
-    
+
     if (!mongoose.models.Category) {
         mongoose.model('Category', CategorySchema);
     }
-  
+
     const recipe = await Recipe.findById(id).populate("category");
 
     recipe.category = Array.isArray(recipe.category) ? recipe.category : [recipe.category];
-    
+
     return {
         props: {
             recipe: JSON.parse(JSON.stringify(recipe)),
         },
-    };    
+    };
 }
