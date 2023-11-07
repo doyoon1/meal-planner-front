@@ -1,4 +1,3 @@
-import { useRouter } from "next/router";
 import SearchBar from "@/components/SearchBar";
 import { Recipe } from "@/models/Recipe";
 import { mongooseConnect } from "@/lib/mongoose";
@@ -8,8 +7,6 @@ import styled from "styled-components";
 import SearchResults from "@/components/SearchResults";
 
 export default function SearchPage({ recipes, query }) {
-  const router = useRouter();
-
   const SearchTitle = styled.h1`
     font-size: 2.5rem;
     margin: 10px 0 20px;

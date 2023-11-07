@@ -5,6 +5,7 @@ import RecipesGrid from '@/components/RecipesGrid';
 import Category from '@/models/Category';
 import Center from '@/components/Center';
 import styled from 'styled-components';
+import ScrollToTopButton from '@/components/ScrollToTop';
 
 const CategoryTitle = styled.h1`
   font-size: 2.5rem;
@@ -35,6 +36,7 @@ export default function CategoryPage({ category, recipes }) {
                   <RecipesGrid recipes={recipes} />
               </div>
             </Center>
+            <ScrollToTopButton />
         </>
     );
 }

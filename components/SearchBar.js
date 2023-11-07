@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/router";
 
 const StyledBg = styled.header`
-  background-color: #eee;
+  background-color: #F0F2F5;
 `;
 
 const SearchContainer = styled.div`
