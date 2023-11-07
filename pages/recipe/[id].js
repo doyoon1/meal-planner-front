@@ -7,7 +7,6 @@ import CategorySchema from "@/models/Category";
 import styled from "styled-components";
 import RecipeImages from "@/components/RecipeImages";
 import Button from "@/components/Button";
-import BagIcon from "@/components/icons/BagIcon";
 import PrintIcon from "@/components/icons/PrintIcon";
 import { BagContext } from "@/components/BagContext";
 import { useContext, useState } from "react";

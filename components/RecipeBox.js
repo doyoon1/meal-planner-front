@@ -28,11 +28,10 @@ const ImageWrapper = styled.div`
   flex-direction: column;
   overflow: hidden;
   position: relative;
-  border-radius: 4px;
 
   background-image: url(${props => props.image});
   background-size: cover;
-  background-position: center; /* Center the image horizontally */
+  background-position: center;
 `;
 
 const NameWrapper = styled.div`
@@ -62,8 +61,7 @@ const ButtonWrapper = styled.div`
   }
 
   &:hover {
-    transform: scale(1.05);
-    background-color: #F0F2F5;
+    color: #777;
   }
 `;
 
@@ -74,25 +72,49 @@ const NameButtonWrapper = styled.div`
 `;
 
 export default function RecipeBox({ _id, title, images, openModal }) {
-  const { addRecipe } = useContext(BagContext);
+  const { addRecipe, removeRecipe } = useContext(BagContext);
   const url = '/recipe/' + _id;
-
+  const { bagRecipes } = useContext(BagContext);
+  const [isSaved, setIsSaved] = useState(bagRecipes.includes(_id));
 
   const handleRecipeClick = () => {
     openModal();
   };
+
+  const handleAddToBagClick = () => {
+    if (isSaved) {
+      removeRecipe(_id);
+    } else {
+      addRecipe(_id);
+    }
   
+    // Toggle the saved state
+    setIsSaved(!isSaved);
+  };
+
   return (
     <RecipeWrapper >
         <ImageWrapper image={images?.[0]} onClick={handleRecipeClick}></ImageWrapper>
         <NameButtonWrapper>
             <NameWrapper onClick={handleRecipeClick}>{title}</NameWrapper>
             <ButtonWrapper>
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                    <path fillRule="evenodd" d="M10.5 6a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm0 6a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0zm0 6a1.5 1.5 0 113 0 1.5 1.5 0 01-3 0z" clipRule="evenodd" />
-                </svg>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill={isSaved ? "#FF3040" : "none"} // Fill with red if saved, else no fill
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke={isSaved ? "#FF3040" : "currentColor"} // Red color if saved, else current color
+                className="w-6 h-6"
+                onClick={handleAddToBagClick}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+                />
+              </svg>
             </ButtonWrapper>
-        </NameButtonWrapper>
+          </NameButtonWrapper>
     </RecipeWrapper>
   );
 }

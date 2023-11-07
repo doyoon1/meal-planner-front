@@ -4,63 +4,65 @@ import Header from "@/components/Header";
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
-import BagTable from "@/components/BagTable";
+import RecipeBox from "@/components/RecipeBox";
+import RecipeModal from "@/components/RecipeDetails";
 
-const ColumnsWrapper = styled.div`
+const RecipesGrid = styled.div`
     display: grid;
-    gap: 10px;
-    margin-top: 40px;
-`;
-
-const Box = styled.div`
-    background-color: #fff;
-    border-radius: 10px;
-    padding: 30px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px; 
 `;
 
 export default function BagPage () {
-    const {bagRecipes} = useContext(BagContext);
+    const { bagRecipes } = useContext(BagContext);
     const [recipes, setRecipes] = useState([]);
+    const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [selectedRecipe, setSelectedRecipe] = useState(null);
+
     useEffect(() => {
         if (bagRecipes.length > 0) {
-            axios.post('/api/bag', {ids:bagRecipes})
-            .then(response => {
-                setRecipes(response.data);
-            })
+            axios.post('/api/bag', { ids: bagRecipes })
+                .then(response => {
+                    setRecipes(response.data);
+                });
         }
     }, [bagRecipes]);
+
+    const openModal = () => {
+        setModalIsOpen(true);
+    };
+
+    const closeModal = () => {
+        setModalIsOpen(false);
+    };
+
+    const handleRecipeClick = (recipe) => {
+        setSelectedRecipe(recipe);
+        openModal();
+    };
+
     return (
         <>
             <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet"/>
             <Header />
             <Center>
-                <ColumnsWrapper>
-                    <Box>
-                        <h2>Recipe Bag</h2>
-                        {!bagRecipes?.length && (
-                            <div>Your grocery bag is empty</div>
-                        )}
-                        {recipes?.length > 0 && (
-
-                        <BagTable>
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <td></td>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            {recipes.map(recipe => (
-                                <tr>
-                                    <td>{recipe.title}</td>
-                                </tr>
-                            ))}
-                            </tbody>
-                        </BagTable>
-                        )}
-                    </Box>
-                </ColumnsWrapper>
+                <h2>My Bag</h2>
+                {!bagRecipes?.length && (
+                    <div>Your grocery bag is empty</div>
+                )}
+                {recipes?.length > 0 && (
+                    <RecipesGrid>
+                        {recipes.map(recipe => (
+                            <RecipeBox
+                                key={recipe._id}
+                                {...recipe}
+                                openModal={() => handleRecipeClick(recipe)}
+                            />
+                        ))}
+                    </RecipesGrid>
+                )}
             </Center>
+            <RecipeModal isOpen={modalIsOpen} closeModal={closeModal} recipe={selectedRecipe} />
         </>
     );
 }

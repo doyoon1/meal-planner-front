@@ -10,21 +10,26 @@ export function BagContextProvider({children}) {
             ls?.setItem('bag', JSON.stringify(bagRecipes));
         }
     }, [bagRecipes]);
+    
     useEffect(() => {
         if (ls && ls.getItem('bag')) {
             setBagRecipes(JSON.parse(ls.getItem('bag')));
         } 
     }, []);
+
     function addRecipe(recipeId) {
         if (!bagRecipes.includes(recipeId)) {
             setBagRecipes(prev => [...prev, recipeId]);
         }    
     }
 
-    return (
-        <BagContext.Provider value={{bagRecipes,setBagRecipes,addRecipe}}>
-            {children}
+    function removeRecipe(recipeId) {
+        setBagRecipes((prev) => prev.filter((id) => id !== recipeId));
+      }
+    
+      return (
+        <BagContext.Provider value={{ bagRecipes, setBagRecipes, addRecipe, removeRecipe }}>
+          {children}
         </BagContext.Provider>
-
-    );
+      );
 }

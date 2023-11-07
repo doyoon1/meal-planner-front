@@ -40,7 +40,9 @@ const LargeImage = styled.img`
   height: 250px;
   width: 100%;
   border-radius: 4px;
+  object-fit: contain; /* Use 'cover' or 'contain' based on your preference */
 `;
+
 
 const SmallImages = styled.div`
   display: flex;
@@ -105,7 +107,7 @@ const AddToBag = styled.a`
   }
 `;
 
-const SeeBag = styled(Link)`
+const SeeBag = styled.a`
 display: flex;
   flex-direction: column;
   font-size: 14px;
@@ -194,7 +196,7 @@ const Servings = styled.p`
 
 function RecipeModal({ isOpen, closeModal, recipe }) {
   const [selectedImage, setSelectedImage] = useState(null);
-  const { bagRecipes, addRecipe } = useContext(BagContext);
+  const { bagRecipes, addRecipe, removeRecipe } = useContext(BagContext);
   const url = '/recipe/' + recipe?._id;
   const isRecipeInBag = bagRecipes.includes(recipe?._id);
   const MAX_DESCRIPTION_WORDS = 40;
@@ -219,6 +221,16 @@ function RecipeModal({ isOpen, closeModal, recipe }) {
   const handleBackgroundClick = (e) => {
     if (modalRef.current && !modalRef.current.contains(e.target)) {
       closeModal();
+    }
+  }; 
+
+  const handleToggleSaveToBag = () => {
+    if (isRecipeInBag) {
+      // If the recipe is in the bag, remove it
+      removeRecipe(recipe._id);
+    } else {
+      // If the recipe is not in the bag, add it
+      addRecipe(recipe._id);
     }
   };
 
@@ -259,16 +271,16 @@ function RecipeModal({ isOpen, closeModal, recipe }) {
               </svg>
               Learn more
             </ModalButtons>
-            <AddToBag>
+            <AddToBag onClick={handleToggleSaveToBag}>
               {isRecipeInBag ? (
-                <SeeBag href="/bag">
+                <SeeBag>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                    <path fillRule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clipRule="evenodd" />
+                    <path d="M3.53 2.47a.75.75 0 00-1.06 1.06l18 18a.75.75 0 101.06-1.06l-18-18zM20.25 5.507v11.561L5.853 2.671c.15-.043.306-.075.467-.094a49.255 49.255 0 0111.36 0c1.497.174 2.57 1.46 2.57 2.93zM3.75 21V6.932l14.063 14.063L12 18.088l-7.165 3.583A.75.75 0 013.75 21z" />
                   </svg>
-                    Already Added
+                     Already Added
                 </SeeBag>
               ) : (
-                <ModalButtons onClick={() => addRecipe(recipe._id)}>
+                <ModalButtons>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
                     <path fillRule="evenodd" d="M6.32 2.577a49.255 49.255 0 0111.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 01-1.085.67L12 18.089l-7.165 3.583A.75.75 0 013.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93z" clipRule="evenodd" />
                   </svg>
