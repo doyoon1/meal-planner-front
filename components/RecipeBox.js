@@ -55,6 +55,7 @@ const ButtonWrapper = styled.div`
   background-color: #fff;
   border-radius: 50%;
   color: #111;
+
   svg {
     height: 24px;
     width: 24px;
@@ -62,6 +63,8 @@ const ButtonWrapper = styled.div`
 
   &:hover {
     color: #777;
+    fill: #FF3040;
+    transform: scale(1.1);
   }
 `;
 
@@ -72,24 +75,20 @@ const NameButtonWrapper = styled.div`
 `;
 
 export default function RecipeBox({ _id, title, images, openModal }) {
-  const { addRecipe, removeRecipe } = useContext(BagContext);
-  const url = '/recipe/' + _id;
-  const { bagRecipes } = useContext(BagContext);
-  const [isSaved, setIsSaved] = useState(bagRecipes.includes(_id));
+  const { bagRecipes, addRecipe, removeRecipe } = useContext(BagContext);
+  const url = '/recipe/' +_id;
+  const isRecipeInBag = bagRecipes.includes(_id);
 
   const handleRecipeClick = () => {
     openModal();
   };
 
   const handleAddToBagClick = () => {
-    if (isSaved) {
+    if (isRecipeInBag) {
       removeRecipe(_id);
     } else {
       addRecipe(_id);
     }
-  
-    // Toggle the saved state
-    setIsSaved(!isSaved);
   };
 
   return (
@@ -100,17 +99,16 @@ export default function RecipeBox({ _id, title, images, openModal }) {
             <ButtonWrapper>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                fill={isSaved ? "#FF3040" : "none"} // Fill with red if saved, else no fill
+                fill={isRecipeInBag ? "#222" : "none"} 
                 viewBox="0 0 24 24"
                 strokeWidth={1.5}
-                stroke={isSaved ? "#FF3040" : "currentColor"} // Red color if saved, else current color
+                stroke={isRecipeInBag ? "#222" : "currentColor"} 
                 className="w-6 h-6"
                 onClick={handleAddToBagClick}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+                <path strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" 
                 />
               </svg>
             </ButtonWrapper>

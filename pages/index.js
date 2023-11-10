@@ -92,7 +92,7 @@ export async function getServerSideProps() {
     };
   }
 
-  const newRecipes = await Recipe.find({}, null, { sort: { _id: -1 }, limit: 12 });
+  const newRecipes = await Recipe.find({}, null, { sort: { _id: -1 }, limit: 6 });
   return {
     props: {
       featuredRecipe: JSON.parse(JSON.stringify(featuredRecipe)),

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import Link from "next/link";
 import { useRef } from "react";
 import { BagContext } from "./BagContext";
 import { useContext } from "react";
+import PlannerModal from "./PlannerModal";
 
 const ModalBackground = styled.div`
   position: fixed;
@@ -168,6 +168,7 @@ const CloseButton = styled.span`
   font-size: 20px;
   height: 20px;
   width: 20px;
+  color: #FF3040;
 `;
 
 const Title = styled.h2`
@@ -200,6 +201,11 @@ function RecipeModal({ isOpen, closeModal, recipe }) {
   const url = '/recipe/' + recipe?._id;
   const isRecipeInBag = bagRecipes.includes(recipe?._id);
   const MAX_DESCRIPTION_WORDS = 40;
+  const [plannerModalIsOpen, setPlannerModalIsOpen] = useState(false);
+
+  const togglePlannerModal = () => {
+    setPlannerModalIsOpen(!plannerModalIsOpen);
+  };
 
   function truncateDescription(description) {
     const words = description.split(' ');
@@ -277,7 +283,7 @@ function RecipeModal({ isOpen, closeModal, recipe }) {
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
                     <path d="M3.53 2.47a.75.75 0 00-1.06 1.06l18 18a.75.75 0 101.06-1.06l-18-18zM20.25 5.507v11.561L5.853 2.671c.15-.043.306-.075.467-.094a49.255 49.255 0 0111.36 0c1.497.174 2.57 1.46 2.57 2.93zM3.75 21V6.932l14.063 14.063L12 18.088l-7.165 3.583A.75.75 0 013.75 21z" />
                   </svg>
-                     Already Added
+                     Already Saved
                 </SeeBag>
               ) : (
                 <ModalButtons>
@@ -288,7 +294,7 @@ function RecipeModal({ isOpen, closeModal, recipe }) {
                 </ModalButtons>
               )}
             </AddToBag>
-            <ModalButtons href={url} target="_blank" rel="noopener noreferrer">
+            <ModalButtons onClick={togglePlannerModal}>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
                 <path fillRule="evenodd" d="M6.75 2.25A.75.75 0 017.5 3v1.5h9V3A.75.75 0 0118 3v1.5h.75a3 3 0 013 3v11.25a3 3 0 01-3 3H5.25a3 3 0 01-3-3V7.5a3 3 0 013-3H6V3a.75.75 0 01.75-.75zm13.5 9a1.5 1.5 0 00-1.5-1.5H5.25a1.5 1.5 0 00-1.5 1.5v7.5a1.5 1.5 0 001.5 1.5h13.5a1.5 1.5 0 001.5-1.5v-7.5z" clipRule="evenodd" />
               </svg>
@@ -297,6 +303,16 @@ function RecipeModal({ isOpen, closeModal, recipe }) {
           </ModalButtonsWrapper>
         </RightColumn>
       </ModalContent>
+      {plannerModalIsOpen && (
+        <>
+          <ModalBackground onClick={(e) => e.stopPropagation()}>
+            <PlannerModal 
+            isOpen={plannerModalIsOpen} 
+            closeModal={togglePlannerModal}
+            recipe={recipe}  />
+          </ModalBackground>
+        </>
+      )}
     </ModalBackground>
   );
 }

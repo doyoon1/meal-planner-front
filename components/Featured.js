@@ -2,7 +2,6 @@ import styled from "styled-components";
 import Center from "./Center";
 import Button from "./Button";
 import ButtonLink from "./ButtonLink";
-import BagIcon from "@/components/icons/BagIcon";
 import { useContext } from "react";
 import { BagContext } from "./BagContext";
 
