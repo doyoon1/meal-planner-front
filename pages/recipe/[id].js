@@ -15,6 +15,7 @@ import YouTube from 'react-youtube';
 import jsPDF from "jspdf";
 import ScrollToTopButton from "@/components/ScrollToTop";
 import copy from "copy-to-clipboard";
+import Fraction from 'fraction.js';
 
 const PageWrapper = styled.div`
     background-color: #eee;
@@ -39,7 +40,8 @@ const CategoryWrapper = styled.div`
     color: #666;
     margin: 0;
     margin-top: 1rem;
-    font-size: 1.2rem;
+    font-size: 1rem;
+    text-align: right;
     a {
         color: #666;
         text-decoration: none;
@@ -248,14 +250,14 @@ export default function RecipePage({ recipe }) {
         }
     }
       
+    const increaseServings = () => {
+        setServings(servings + 1);
+    };
+    
     const decreaseServings = () => {
         if (servings > 1) {
             setServings(servings - 1);
         }
-    };
-
-    const increaseServings = () => {
-        setServings(servings + 1);
     };
 
     // Calculate the ratio of servings change
@@ -267,6 +269,13 @@ export default function RecipePage({ recipe }) {
         quantity: (ingredient.quantity * servingsRatio).toFixed(2),
         measurement: ingredient.measurement,
     }));
+
+    //Fraction
+    // const updatedIngredients = originalIngredients.map((ingredient) => ({
+    //     name: ingredient.name,
+    //     quantity: new Fraction(ingredient.quantity).mul(servingsRatio).toFraction(true),
+    //     measurement: ingredient.measurement,
+    // }));
 
     const nutriValueList = recipe.nutriValue.map((nutriItem, index) => (
         <ListItem key={index}>

@@ -1,5 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
+import { useContext } from "react";
+import { PlannerContext } from "./PlannerContext";
 
 const PlannerModalBackground = styled.div`
   position: fixed;
@@ -21,10 +23,10 @@ const PlannerModalContent = styled.div`
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   z-index: 1000;
   position: relative;
-  font-family: "Poppins", sans-serif; 
+  font-family: "Poppins", sans-serif;
 
   h4 {
-    font-family: "Poppins", sans-serif; 
+    font-family: "Poppins", sans-serif;
   }
 `;
 
@@ -36,7 +38,7 @@ const CloseButton = styled.span`
   font-size: 20px;
   height: 20px;
   width: 20px;
-  color: #FF3040;
+  color: #ff3040;
 `;
 
 const AddToPlannerButton = styled.button`
@@ -48,7 +50,7 @@ const AddToPlannerButton = styled.button`
   font-size: 14px;
   margin-top: 20px;
   border-radius: 5px;
-  font-family: "Poppins", sans-serif; 
+  font-family: "Poppins", sans-serif;
 `;
 
 const SelectDay = styled.select`
@@ -57,21 +59,30 @@ const SelectDay = styled.select`
   margin: 10px 0;
   border: 1px solid #ccc;
   border-radius: 5px;
-  font-family: "Poppins", sans-serif; 
+  font-family: "Poppins", sans-serif;
 `;
 
-function PlannerModal({ isOpen, closeModal, recipe, onAddToPlanner }) {
-  const [selectedDay, setSelectedDay] = useState("Monday");
+const PlannerModal = ({ recipe, isOpen, closeModal }) => {
+  const { addRecipeToDay } = useContext(PlannerContext);
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [selectedDay, setSelectedDay] = useState("Monday"); // Initialize with a default day
 
-  const daysOfWeek = [
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
-    "Sunday",
-  ];
+  useEffect(() => {
+    // Update selectedRecipe when the recipe prop changes
+    setSelectedRecipe(recipe);
+  }, [recipe]);
+
+  const handleDayChange = (day) => {
+    setSelectedDay(day);
+  };
+  
+  const handleAddToPlanner = () => {
+    if (selectedRecipe) {
+      addRecipeToDay(selectedDay, selectedRecipe);
+      console.log(localStorage.getItem("planner")); // Log the updated localStorage
+      closeModal();
+    }
+  };
 
   return (
     isOpen && (
@@ -97,14 +108,16 @@ function PlannerModal({ isOpen, closeModal, recipe, onAddToPlanner }) {
             value={selectedDay}
             onChange={(e) => setSelectedDay(e.target.value)}
           >
-            {daysOfWeek.map((day) => (
-              <option key={day} value={day}>
-                {day}
-              </option>
-            ))}
+            <option value="Monday">Monday</option>
+            <option value="Tuesday">Tuesday</option>
+            <option value="Wednesday">Wednesday</option>
+            <option value="Thursday">Thursday</option>
+            <option value="Friday">Friday</option>
+            <option value="Saturday">Saturday</option>
+            <option value="Sunday">Sunday</option>
           </SelectDay>
 
-          <AddToPlannerButton onClick={() => onAddToPlanner(selectedDay)}>
+          <AddToPlannerButton onClick={handleAddToPlanner}>
             Add to Planner
           </AddToPlannerButton>
         </PlannerModalContent>

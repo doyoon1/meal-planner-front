@@ -199,7 +199,7 @@ function RecipeModal({ isOpen, closeModal, recipe }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const { bagRecipes, addRecipe, removeRecipe } = useContext(BagContext);
   const url = '/recipe/' + recipe?._id;
-  const isRecipeInBag = bagRecipes.includes(recipe?._id);
+  const isRecipeInBag = bagRecipes?.includes(recipe?._id);
   const MAX_DESCRIPTION_WORDS = 40;
   const [plannerModalIsOpen, setPlannerModalIsOpen] = useState(false);
 

@@ -1,4 +1,5 @@
 import { BagContextProvider } from "@/components/BagContext";
+import PlannerContextProvider from "@/components/PlannerContext";
 import { createGlobalStyle } from "styled-components"
 
 const GlobalStyles = createGlobalStyle`
@@ -17,7 +18,9 @@ export default function App({ Component, pageProps }) {
     <>
       <GlobalStyles />
       <BagContextProvider>
-        <Component {...pageProps} />
+        <PlannerContextProvider>
+          <Component {...pageProps} />
+        </PlannerContextProvider>
       </BagContextProvider>
     </>
   );

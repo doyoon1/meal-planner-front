@@ -77,7 +77,7 @@ const NameButtonWrapper = styled.div`
 export default function RecipeBox({ _id, title, images, openModal }) {
   const { bagRecipes, addRecipe, removeRecipe } = useContext(BagContext);
   const url = '/recipe/' +_id;
-  const isRecipeInBag = bagRecipes.includes(_id);
+  const isRecipeInBag = bagRecipes?.includes(_id);
 
   const handleRecipeClick = () => {
     openModal();
