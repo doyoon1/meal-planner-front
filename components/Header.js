@@ -14,7 +14,7 @@ const StyledHeader = styled.header`
 `;
 
 const Logo = styled(Link)`
-    color:#fff;
+    color: #fff;
     text-decoration: none;
     position: relative;
     z-index: 3;

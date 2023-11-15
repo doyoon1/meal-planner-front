@@ -31,6 +31,7 @@ const SearchButton = styled.button`
   padding: 10px 20px;
   font-size: 1.2rem;
   border: none;
+  border: 1px solid #222;
   border-top-right-radius: 32px;
   border-bottom-right-radius: 32px;
   cursor: pointer;

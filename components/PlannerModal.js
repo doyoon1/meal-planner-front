@@ -45,12 +45,17 @@ const AddToPlannerButton = styled.button`
   background-color: #111;
   color: #fff;
   border: none;
-  padding: 6px 12px;
+  padding: 6px 18px;
   cursor: pointer;
   font-size: 14px;
   margin-top: 20px;
-  border-radius: 5px;
+  border-radius: 2px;
   font-family: "Poppins", sans-serif;
+  transition: all .4s;
+
+  &:hover {
+    border-radius: 24px;
+  }
 `;
 
 const SelectDay = styled.select`

@@ -5,6 +5,12 @@ import Center from "@/components/Center";
 import styled from "styled-components";
 import jsPDF from "jspdf";
 import Fraction from "fraction.js";
+import "@/components/fonts/Poppins-Light-normal"
+import "@/components/fonts/Poppins-Medium-normal"
+import "@/components/fonts/OpenSans_Condensed-Regular-normal"
+import "@/components/fonts/Inter-Regular-normal"
+import "@/components/fonts/Inter-Bold-normal"
+import "@/components/fonts/RobotoSlab-Medium-bold"
 
 const PlannerContainer = styled.div`
   margin: 0 auto;
@@ -60,6 +66,23 @@ const ImageContainer = styled.div`
   margin-right: 10px;
   border-radius: 8px;
   overflow: hidden;
+`;
+
+const TitleInput = styled.input`
+  height: 24px;
+  width: 100%;
+  padding: 5px 10px;
+  font-weight: 500;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  border: 1px solid #CDDDC9;
+  border-radius: 4px;
+`;
+
+const TitleContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 `;
 
 const DateRange = styled.div`
@@ -138,6 +161,7 @@ const getWeekDates = () => {
 const PlannerPage = () => {
   const { planner, removeRecipeFromDay } = useContext(PlannerContext);
   const [isClient, setIsClient] = useState(false);
+  const [pdfTitle, setPdfTitle] = useState("");
 
   useEffect(() => {
     setIsClient(true);
@@ -145,22 +169,24 @@ const PlannerPage = () => {
 
   const generatePDF = () => {
     const doc = new jsPDF();
-    const maxLinesPerPage = 52;
+    const maxLinesPerPage = 50;
     let currentLine = 0;
     let currentPage = 1;
     const columnWidth = 100; // Adjust this value based on your needs
+    const today = new Date();
   
     // Function to add a new page and set the title
     const addNewPage = () => {
       doc.addPage();
       doc.setFont('Poppins-Medium', 'normal');
-      doc.setFontSize(14);
+      doc.setFontSize(18);
       doc.setTextColor(17, 17, 17); // RGB values for dark gray
       doc.text("MealGrub", 10, 10);
       doc.setFontSize(12);
       doc.setTextColor(64, 64, 64); // RGB values for dark gray
-
-      doc.setFont("Inter-Light, normal");
+  
+    // Set the font family for the ingredients
+      doc.setFont('RobotoSlab-Medium', 'bold');
       doc.setFontSize(10);
       currentLine = 0;
       currentPage += 1;
@@ -168,11 +194,31 @@ const PlannerPage = () => {
   
     // Set the font style and size for the title
     doc.setFont('Poppins-Medium', 'normal');
-    doc.setFontSize(14);
+    doc.setFontSize(18);
   
     // Set the title of the PDF
     doc.text("MealGrub", 10, 10);
-  
+
+    doc.setFont('Inter-Regular', 'normal');
+    doc.setFontSize(10);
+    
+    // Add a title text with an underline
+    doc.text("Title:", 10, 20);
+
+    // If pdfTitle is not empty, add the filled title with an underline
+    if (pdfTitle) {
+      doc.setFont('Inter-Bold', 'normal');
+      doc.text(`${pdfTitle}`, 19, 20);
+    }
+
+    // Add Date label
+    doc.setFont('Inter-Regular', 'normal');
+    doc.text("Date:", 161, 20);
+
+    doc.setFont('Inter-Bold', 'normal');
+    // Add the current date
+    doc.text(today.toDateString(), 171, 20);
+
     // Use an object to track unique ingredients and their quantities
     const ingredientMap = {};
   
@@ -200,17 +246,17 @@ const PlannerPage = () => {
   
     // Set the font size for the ingredients
     doc.setFontSize(10);
-
+  
     doc.setTextColor(64, 64, 64); // RGB values for dark gray
   
     // Set the font family for the ingredients
-    doc.setFont("Inter-Light, normal");
+    doc.setFont('RobotoSlab-Medium', 'bold');
   
     // Add a title before the separator line
-    doc.text("Ingredients:", 10, 20);
-  
+    doc.text("Ingredients:", 10, 30); // Adjusted y-coordinate here
+
     // Add a separator line
-    const separatorY = 23;
+    const separatorY = 33; // Adjusted y-coordinate here
     doc.line(10, separatorY, 200, separatorY);
   
     // Create a string with combined ingredients
@@ -228,17 +274,20 @@ const PlannerPage = () => {
       if (currentLine >= maxLinesPerPage) {
         addNewPage();
       }
-  
+
       // Adjust the y-coordinate on the new page
-      const yCoordinate = currentPage === 1 ? separatorY + 6 + currentLine * 5 : 20 + currentLine * 5;
-  
+      const yCoordinate = currentPage === 1 ? separatorY + 6 + currentLine * 5 : 20 + currentLine * 5; // Updated here
+
       // Add the line to the current column
       doc.text(line, 10, yCoordinate);
       currentLine += 1;
     });
+      
+    // Get the current date for the PDF file name
+    const dateFormatted = `${today.toLocaleString('default', { month: 'long' })}_${today.getDate()}_${today.getFullYear()}`;
   
     // Save the PDF with a unique name (e.g., meal plan + timestamp)
-    const pdfFileName = `MealGrub-MealPlan_${new Date().getTime()}.pdf`;
+    const pdfFileName = `MealGrub-MealPlan_${dateFormatted}.pdf`;
     doc.save(pdfFileName);
   };
   
@@ -246,7 +295,6 @@ const PlannerPage = () => {
     generatePDF();
   };
 
-  
   const renderRecipesForDay = (planner, day) => {
     const handleRemoveRecipe = (recipeId) => {
       removeRecipeFromDay(day, recipeId);
@@ -283,8 +331,16 @@ const PlannerPage = () => {
       <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap" rel="stylesheet" />
       <Header />
       <Center>
-        <h2>My Planner</h2>
+      <h2>My Planner</h2>
         <DateRange>{getWeekDates()}</DateRange>
+        <TitleContainer>
+        <TitleInput
+          type="text"
+          placeholder="Enter your meal plan title"
+          value={pdfTitle}
+          onChange={(e) => setPdfTitle(e.target.value)}
+        />
+      </TitleContainer>
         <PlannerContainer>
           {isClient &&
             daysOfWeek.map((day) => renderRecipesForDay(planner, day))}

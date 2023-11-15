@@ -16,6 +16,12 @@ import jsPDF from "jspdf";
 import ScrollToTopButton from "@/components/ScrollToTop";
 import copy from "copy-to-clipboard";
 import Fraction from 'fraction.js';
+import "@/components/fonts/Poppins-Light-normal"
+import "@/components/fonts/Poppins-Medium-normal"
+import "@/components/fonts/OpenSans_Condensed-Regular-normal"
+import "@/components/fonts/Inter-Regular-normal"
+import "@/components/fonts/Inter-Bold-normal"
+import "@/components/fonts/RobotoSlab-Medium-bold"
 
 const PageWrapper = styled.div`
     background-color: #eee;
@@ -197,42 +203,69 @@ export default function RecipePage({ recipe }) {
 
     const generatePDF = () => {
         const doc = new jsPDF();
+        const today = new Date();
       
-        // Set the font style to Poppins      
+        // Set the font style to Poppins
+        doc.setFont('Poppins-Medium', 'normal');
+      
         // Set the title of the PDF (not centered, but bold)
-        doc.setFont('Poppins', 'bold');
-        doc.setFontSize(18); // Decrease font size for the title
-        doc.text('MealGrub Grocery List', 10, 10); // Adjust the top margin
-        doc.setFontSize(16); // Reset font size
+        doc.setFontSize(18);
       
-        // Set the recipe name (not centered)
-        doc.text(recipe.title, 10, 30); // Remove margin under the recipe name     
-        
-        doc.setFont('Poppins', 'normal');
+        // Create a link to the recipe page
+        const recipeLink = `${window.location.origin}/recipe/${recipe._id}`;
+        const originLink = window.location.origin;
+        doc.setTextColor(86, 130, 3);
+        doc.textWithLink("MealGrub", 10, 10, { url: originLink });
       
-        // Display the current serving
-        doc.setFontSize(12); // Reset font size
-        doc.text(`Servings: ${servings}`, 10, 40); // Add margin at the bottom of Servings
-
-        doc.setTextColor(119); 
-        // Display today's date on the same line with a space in between
-        doc.setFontSize(12);
-        const date = new Date().toLocaleDateString();
-        const dateX = 10; // Adjust the X position as needed
-        doc.text(`Date: ${date}`, dateX, 20);
-
+        // Reset font size
+        doc.setFontSize(16);
+      
+        doc.setFont('Inter-Regular', 'normal');
+        doc.setTextColor(17, 17, 17);
+        doc.setFontSize(10);
+        doc.text("Title:", 10, 20);
+        doc.text("Servings:", 10, 25);
+        doc.setFont('Inter-Bold', 'normal');
+      
+        // Set the title as a hyperlink
+        doc.textWithLink(recipe.title, 19, 20, { url: recipeLink });
+      
+        doc.text(`${servings}`, 26, 25);
+      
+        // Add Date label
+        doc.setFont('Inter-Regular', 'normal');
+        doc.text("Date:", 161, 20);
+      
+        doc.setFont('Inter-Bold', 'normal');
+        // Add the current date
+        doc.text(today.toDateString(), 171, 20);
+      
+        doc.setFontSize(10);
+        doc.setTextColor(64, 64, 64); // RGB values for dark gray
+      
+        // Set the font family for the ingredients
+        doc.setFont('RobotoSlab-Medium', 'bold');
+      
+        // Add a title before the separator line
+        doc.text("Ingredients:", 10, 35); // Adjusted y-coordinate here
+      
+        // Add a separator line
+        const separatorY = 38; // Adjusted y-coordinate here
+        doc.line(10, separatorY, 200, separatorY);
+      
         // Initialize the vertical position for ingredients
-        let yPos = 50;        
+        let yPos = 44;
+      
         // Loop through and add each ingredient to the PDF
         updatedIngredients.forEach((ingredient) => {
-            doc.text(`${ingredient.quantity} ${ingredient.measurement} - ${ingredient.name}`, 10, yPos);
-            yPos += 5;
+          doc.text(`${ingredient.quantity} ${ingredient.measurement} - ${ingredient.name}`, 10, yPos);
+          yPos += 5;
         });
       
         // Save the PDF with a unique name (e.g., recipe name + timestamp)
         const pdfFileName = `MealGrub-${recipe.title}_Ingredients_${new Date().getTime()}.pdf`;
         doc.save(pdfFileName);
-    };
+    };      
 
     const copyIngredientsToClipboard = () => {
         const ingredientsText = updatedIngredients
@@ -264,18 +297,18 @@ export default function RecipePage({ recipe }) {
     const servingsRatio = servings / originalServings;
 
     // Update ingredient measurements based on the ratio
-    const updatedIngredients = originalIngredients.map((ingredient) => ({
-        name: ingredient.name,
-        quantity: (ingredient.quantity * servingsRatio).toFixed(2),
-        measurement: ingredient.measurement,
-    }));
-
-    //Fraction
     // const updatedIngredients = originalIngredients.map((ingredient) => ({
     //     name: ingredient.name,
-    //     quantity: new Fraction(ingredient.quantity).mul(servingsRatio).toFraction(true),
+    //     quantity: (ingredient.quantity * servingsRatio).toFixed(2),
     //     measurement: ingredient.measurement,
     // }));
+
+    //Fraction
+    const updatedIngredients = originalIngredients.map((ingredient) => ({
+        name: ingredient.name,
+        quantity: new Fraction(ingredient.quantity).mul(servingsRatio).toFraction(true),
+        measurement: ingredient.measurement,
+    }));
 
     const nutriValueList = recipe.nutriValue.map((nutriItem, index) => (
         <ListItem key={index}>

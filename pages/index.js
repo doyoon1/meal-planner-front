@@ -31,7 +31,7 @@ const Icon = styled.svg`
   height: 20px;
 `;
 
-export default function HomePage({ featuredRecipe, newRecipes }) {
+export default function HomePage({ featuredRecipes, newRecipes }) {
   const [isSideWindowOpen, setIsSideWindowOpen] = useState(false);
 
   const toggleSideWindow = () => {
@@ -51,7 +51,7 @@ export default function HomePage({ featuredRecipe, newRecipes }) {
       />
       <div style={mainContentStyle}>
         <Header />
-        <Featured recipe={featuredRecipe} />
+        <Featured recipes={featuredRecipes} />
         <SearchBar />
         <NewRecipes recipes={newRecipes} />
         <ScrollToTopButton />
@@ -83,19 +83,20 @@ export default function HomePage({ featuredRecipe, newRecipes }) {
 export async function getServerSideProps() {
   await mongooseConnect();
 
-  // Query MongoDB to find the featured recipe with "featured" field set to true
-  const featuredRecipe = await Recipe.findOne({ featured: true });
+  // Query MongoDB to find featured recipes with "featured" field set to true
+  const featuredRecipes = await Recipe.find({ featured: true });
 
-  if (!featuredRecipe) {
+  if (!featuredRecipes || featuredRecipes.length === 0) {
     return {
-      notFound: true, // Handle the case where no featured recipe is found
+      notFound: true, 
     };
   }
 
   const newRecipes = await Recipe.find({}, null, { sort: { _id: -1 }, limit: 6 });
+
   return {
     props: {
-      featuredRecipe: JSON.parse(JSON.stringify(featuredRecipe)),
+      featuredRecipes: JSON.parse(JSON.stringify(featuredRecipes)),
       newRecipes: JSON.parse(JSON.stringify(newRecipes)),
     },
   };

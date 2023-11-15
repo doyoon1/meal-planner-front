@@ -12,6 +12,7 @@ const RecipeWrapper = styled.div`
   border-radius: 4px;
   cursor: pointer;
   user-select: none;
+  border: 1px solid #e0e0e0;
 
   &:hover {
     transform: scale(0.99);
