@@ -21,7 +21,7 @@ const SeeMore = styled(Link)`
 
 `;
 
-const SeeMoreLink = styled.a`
+const SeeMoreLink = styled.div`
   font-size: 1rem;
   color: #0070f3;
   cursor: pointer;

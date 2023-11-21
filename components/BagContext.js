@@ -1,3 +1,4 @@
+// BagContext.js
 import { createContext, useEffect, useState } from "react";
 
 export const BagContext = createContext({});
@@ -7,16 +8,16 @@ export function BagContextProvider({ children }) {
   const [bagRecipes, setBagRecipes] = useState([]);
 
   useEffect(() => {
-    if (ls && ls.getItem('bag')) {
-      setBagRecipes(JSON.parse(ls.getItem('bag')));
+    if (ls && ls.getItem("bag")) {
+      setBagRecipes(JSON.parse(ls.getItem("bag")));
     }
   }, [ls]);
 
   useEffect(() => {
     if (bagRecipes?.length > 0) {
-      ls?.setItem('bag', JSON.stringify(bagRecipes));
+      ls?.setItem("bag", JSON.stringify(bagRecipes));
     } else {
-      ls?.removeItem('bag'); // Remove the 'bag' item from local storage if bag is empty
+      ls?.removeItem("bag");
     }
   }, [bagRecipes, ls]);
 

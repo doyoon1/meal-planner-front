@@ -7,6 +7,7 @@ import styled from "styled-components";
 import PlannerModal from "@/components/PlannerModal";
 import { PlannerContext } from "@/components/PlannerContext";
 import Link from 'next/link';
+import ScrollToTopButton from "@/components/ScrollToTop";
 
 const RecipeContainer = styled.div`
   display: flex;
@@ -188,6 +189,7 @@ export default function BagPage() {
         closeModal={closeModal}
         handleAddToPlanner={handleAddToPlanner}
       />
+      <ScrollToTopButton />
       </Center>
     </>
   );

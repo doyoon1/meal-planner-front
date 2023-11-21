@@ -309,7 +309,7 @@ function RecipeModal({ isOpen, closeModal, recipe }) {
             <PlannerModal 
             isOpen={plannerModalIsOpen} 
             closeModal={togglePlannerModal}
-            recipe={recipe}  />
+            recipe={recipe} />
           </ModalBackground>
         </>
       )}

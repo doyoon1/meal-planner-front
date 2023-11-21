@@ -161,14 +161,14 @@ export default function Header() {
                 </NavLink>
                 <CoursesDropdown categories={coursesCategories} label="Courses" />
                 <CoursesDropdown categories={dietaryCategories} label="By Diet" />
-                <NavLink href={"/bag"} isActive={router.pathname === "/bag"}>
+                {/* <NavLink href={"/bag"} isActive={router.pathname === "/bag"}>
                   <BagInfo>
                     <BagIconContainer>
                       <BagIcon />
                     </BagIconContainer>
                     ({bagRecipes?.length})
                   </BagInfo>
-                </NavLink>
+                </NavLink> */}
                 <NavLink href={"/signup"} isActive={router.pathname === "/signup"}>
                   Sign up
                 </NavLink>

@@ -4,7 +4,7 @@ import RecipeModal from './ImageModal';
 
 const BigImage = styled.img`
   width: 100%;
-  height: 30.12vw;
+  height: 34.12vw;
   object-fit: cover;
   background-position: center; 
 `;
