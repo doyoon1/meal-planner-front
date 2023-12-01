@@ -5,11 +5,12 @@ import { mongooseConnect } from "@/lib/mongoose";
 import { Recipe } from "@/models/Recipe";
 import RecipesGrid from "@/components/RecipesGrid";
 import SearchBar from "@/components/RecipeSearch";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import SideWindow from "@/components/SideWindow";
 import ScrollToTopButton from "@/components/ScrollToTop";
 import { Pagination } from 'antd';
 import { useRouter } from 'next/router';
+import { BagContext } from "@/components/BagContext";
 
 const Title = styled.h2`
     font-size: 2.5rem;
@@ -24,19 +25,19 @@ const IconButtons = styled.div`
   top: ${(props) => (props.isSideWindowOpen ? "300px" : "300px")};
   right: ${(props) => (props.isSideWindowOpen ? "405px" : "55px")};
   z-index: 999;
-  background-color: #F0F2F5;
+  background-color: #fff;
   border-radius: 50%;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  transition: top 0.5s, right 0.5s;
+  transition: top 0.5s, right 0.5s; 
 `;
 
 const Icon = styled.svg`
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
 `;
 
 const StyledPagination = styled(Pagination)`
@@ -90,9 +91,27 @@ const StyledPagination = styled(Pagination)`
   }
 `;
 
+const BagLength = styled.span`
+  font-size: 10px;
+  position: absolute;
+  height: 8px;
+  width: 8px;
+  top: -5px;
+  right: -5px;
+  background-color: #FF0126;
+  color: #fff;
+  padding: 5px;
+  border-radius: 50%;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
 const RecipesPage = ({ recipes, query, totalPages, currentPage }) => {
   const [isSideWindowOpen, setIsSideWindowOpen] = useState(false);
   const router = useRouter();
+  const {bagRecipes} = useContext(BagContext);
 
   const toggleSideWindow = () => {
     setIsSideWindowOpen(!isSideWindowOpen);
@@ -112,10 +131,6 @@ const RecipesPage = ({ recipes, query, totalPages, currentPage }) => {
 
   return (
     <>
-      <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap"
-        rel="stylesheet"
-      />
       <div style={mainContentStyle}>
         <Header />
         <SearchBar initialValue={query} />
@@ -149,54 +164,27 @@ const RecipesPage = ({ recipes, query, totalPages, currentPage }) => {
         </Center>
         <ScrollToTopButton />
       </div>
-      <SideWindow isOpen={isSideWindowOpen} onClose={toggleSideWindow}>
-        <p>Side Window Content</p>
-      </SideWindow>
+      <SideWindow isOpen={isSideWindowOpen} onClose={toggleSideWindow} />
       <IconButtons
         className="icon-button"
         onClick={toggleSideWindow}
         isSideWindowOpen={isSideWindowOpen}
       >
         {isSideWindowOpen ? (
-          <Icon
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="w-6 h-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
+          <Icon xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+            <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clipRule="evenodd" />
           </Icon>
-        ) : (
-          <Icon
-            xmlns="http://www.w3.org/2000/svg"
-            class="icon icon-tabler icon-tabler-calendar-filled"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="#2c3e50"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path
-              d="M16 2a1 1 0 0 1 .993 .883l.007 .117v1h1a3 3 0 0 1 2.995 2.824l.005 .176v12a3 3 0 0 1 -2.824 2.995l-.176 .005h-12a3 3 0 0 1 -2.995 -2.824l-.005 -.176v-12a3 3 0 0 1 2.824 -2.995l.176 -.005h1v-1a1 1 0 0 1 1.993 -.117l.007 .117v1h6v-1a1 1 0 0 1 1 -1zm3 7h-14v9.625c0 .705 .386 1.286 .883 1.366l.117 .009h12c.513 0 .936 -.53 .993 -1.215l.007 -.16v-9.625z"
-              stroke-width="0"
-              fill="currentColor"
-            />
-            <path
-              d="M12 12a1 1 0 0 1 .993 .883l.007 .117v3a1 1 0 0 1 -1.993 .117l-.007 -.117v-2a1 1 0 0 1 -.117 -1.993l.117 -.007h1z"
-              stroke-width="0"
-              fill="currentColor"
-            />
-          </Icon>
+          ) : (
+          <>
+              {bagRecipes.length > 0 && (
+                <BagLength>
+                  {bagRecipes.length}
+                </BagLength>
+              )}
+            <Icon xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+              <path fillRule="evenodd" d="M7.5 6v.75H5.513c-.96 0-1.764.724-1.865 1.679l-1.263 12A1.875 1.875 0 004.25 22.5h15.5a1.875 1.875 0 001.865-2.071l-1.263-12a1.875 1.875 0 00-1.865-1.679H16.5V6a4.5 4.5 0 10-9 0zM12 3a3 3 0 00-3 3v.75h6V6a3 3 0 00-3-3zm-3 8.25a3 3 0 106 0v-.75a.75.75 0 011.5 0v.75a4.5 4.5 0 11-9 0v-.75a.75.75 0 011.5 0v.75z" clipRule="evenodd" />
+            </Icon>
+          </>
         )}
       </IconButtons>
     </>

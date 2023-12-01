@@ -96,6 +96,32 @@ const RemoveButtonIcon = styled.svg`
   margin-right: 5px;
 `;
 
+const EmptyBagMessage = styled.div`
+  font-size: 14px;
+  margin: 0;
+  color: #111;
+  font-weight: 500;
+  white-space: normal;
+  padding: 4px 10px;
+  padding-bottom: 10px;
+  text-align: center;
+  align-items: center;
+  display: flex;
+  justify-content: center;
+`;
+
+const EmptyIcon = styled.div`
+  margin-right: 4px;
+  color: #aaa;
+  height: 24px;
+  width: 24px;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+  align-content: center;
+`;
+
+
 const SideWindow = ({ isOpen }) => {
   const { bagRecipes, removeRecipe } = useContext(BagContext);
   const [recipeDetails, setRecipeDetails] = useState([]);
@@ -122,7 +148,17 @@ const SideWindow = ({ isOpen }) => {
     <WindowContainer isOpen={isOpen}>
       <BagTitle>My Bag</BagTitle>
       <RecipeWrapper>
-        <TitleLabel>Recipe Name</TitleLabel>
+      <TitleLabel>Recipe Name</TitleLabel>
+        {bagRecipes.length === 0 && (
+          <EmptyBagMessage>
+          <EmptyIcon>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+              <path fillRule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clipRule="evenodd" />
+            </svg>
+          </EmptyIcon>
+            Your bag is empty!
+          </EmptyBagMessage>
+        )}
         {recipeDetails.map((recipe) => (
           <RecipeItem key={recipe._id}>
             <RecipeLink href={`/recipe/${recipe._id}`} target="_blank" rel="noopener noreferrer">
@@ -143,5 +179,6 @@ const SideWindow = ({ isOpen }) => {
     </WindowContainer>
   );
 };
+
 
 export default SideWindow;

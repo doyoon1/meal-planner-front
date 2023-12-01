@@ -67,10 +67,27 @@ const SelectDay = styled.select`
   font-family: "Poppins", sans-serif;
 `;
 
+const CheckboxContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+`;
+
+const CheckboxLabel = styled.label`
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+`;
+
+const CheckboxInput = styled.input`
+  margin-right: 8px;
+`;
+
 const PlannerModal = ({ recipe, isOpen, closeModal }) => {
   const { addRecipeToDay } = useContext(PlannerContext);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [selectedDay, setSelectedDay] = useState("Monday"); // Initialize with a default day
+  const [selectedMeals, setSelectedMeals] = useState(["Breakfast"]); // Initialize with a default meal
 
   useEffect(() => {
     // Update selectedRecipe when the recipe prop changes
@@ -80,10 +97,23 @@ const PlannerModal = ({ recipe, isOpen, closeModal }) => {
   const handleDayChange = (day) => {
     setSelectedDay(day);
   };
-  
+
+  const handleMealChange = (meal) => {
+    // Toggle the selected meal
+    setSelectedMeals((prevMeals) => {
+      if (prevMeals.includes(meal)) {
+        // If the meal is already selected, remove it
+        return prevMeals.filter((selectedMeal) => selectedMeal !== meal);
+      } else {
+        // If the meal is not selected, add it
+        return [...prevMeals, meal];
+      }
+    });
+  };
+
   const handleAddToPlanner = () => {
     if (selectedRecipe) {
-      addRecipeToDay(selectedDay, selectedRecipe);
+      addRecipeToDay(selectedDay, selectedMeals, selectedRecipe);
       console.log(localStorage.getItem("planner")); // Log the updated localStorage
       closeModal();
     }
@@ -111,7 +141,7 @@ const PlannerModal = ({ recipe, isOpen, closeModal }) => {
 
           <SelectDay
             value={selectedDay}
-            onChange={(e) => setSelectedDay(e.target.value)}
+            onChange={(e) => handleDayChange(e.target.value)}
           >
             <option value="Monday">Monday</option>
             <option value="Tuesday">Tuesday</option>
@@ -121,6 +151,48 @@ const PlannerModal = ({ recipe, isOpen, closeModal }) => {
             <option value="Saturday">Saturday</option>
             <option value="Sunday">Sunday</option>
           </SelectDay>
+
+          <CheckboxContainer>
+            <CheckboxLabel>
+              <CheckboxInput
+                type="checkbox"
+                value="Breakfast"
+                checked={selectedMeals.includes("Breakfast")}
+                onChange={() => handleMealChange("Breakfast")}
+              />
+              Breakfast
+            </CheckboxLabel>
+
+            <CheckboxLabel>
+              <CheckboxInput
+                type="checkbox"
+                value="Lunch"
+                checked={selectedMeals.includes("Lunch")}
+                onChange={() => handleMealChange("Lunch")}
+              />
+              Lunch
+            </CheckboxLabel>
+
+            <CheckboxLabel>
+              <CheckboxInput
+                type="checkbox"
+                value="Dinner"
+                checked={selectedMeals.includes("Dinner")}
+                onChange={() => handleMealChange("Dinner")}
+              />
+              Dinner
+            </CheckboxLabel>
+
+            <CheckboxLabel>
+              <CheckboxInput
+                type="checkbox"
+                value="Other"
+                checked={selectedMeals.includes("Other")}
+                onChange={() => handleMealChange("Other")}
+              />
+              Other
+            </CheckboxLabel>
+          </CheckboxContainer>
 
           <AddToPlannerButton onClick={handleAddToPlanner}>
             Add to Planner

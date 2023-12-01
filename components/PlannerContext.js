@@ -19,40 +19,45 @@ const PlannerContextProvider = (props) => {
   }, [planner]);
 
   // Inside the PlannerContext.js file, within the addRecipeToDay function
-  const addRecipeToDay = (day, meal, recipe) => {
-    console.log(`Adding recipe ${recipe.title} to ${day}'s ${meal}`);
-
+  const addRecipeToDay = (day, meals, recipe) => {
+    // Ensure meals is always an array
+    const mealsArray = Array.isArray(meals) ? meals : [meals];
+  
+    console.log(`Adding recipe ${recipe.title} to ${day}'s ${mealsArray.join(', ')}`);
+  
     // Create a copy of the planner to avoid mutating state directly
     const updatedPlanner = { ...planner };
-
+  
     // Check if the day exists in the planner
     if (!updatedPlanner[day]) {
       // If the day doesn't exist, create a new entry with the recipe
       updatedPlanner[day] = {};
     }
-
-    // Check if the meal exists for the selected day
-    if (!updatedPlanner[day][meal]) {
-      // If the meal doesn't exist, create a new array for recipes
-      updatedPlanner[day][meal] = [];
-    }
-
-    // Check if the recipe already exists for the selected day and meal
-    const recipeExists = updatedPlanner[day][meal].some((r) => r.title === recipe.title);
-
-    // If the recipe exists, return without adding it again
-    if (recipeExists) {
-      return;
-    }
-
-    // If the recipe doesn't exist, update the recipes array for that day and meal
-    updatedPlanner[day][meal].push(recipe);
-
+  
+    // Loop through the selected meals and update the recipes array for each meal
+    mealsArray.forEach((meal) => {
+      // Check if the meal exists for the selected day
+      if (!updatedPlanner[day][meal]) {
+        // If the meal doesn't exist, create a new array for recipes
+        updatedPlanner[day][meal] = [];
+      }
+  
+      // Check if the recipe already exists for the selected day and meal
+      const recipeExists = updatedPlanner[day][meal].some((r) => r.title === recipe.title);
+  
+      // If the recipe exists, return without adding it again
+      if (recipeExists) {
+        return;
+      }
+  
+      // If the recipe doesn't exist, update the recipes array for that day and meal
+      updatedPlanner[day][meal].push(recipe);
+    });
+  
     // Update the planner state
     setPlanner(updatedPlanner);
   };
-
-
+  
   const removeRecipeFromDay = (day, meal, recipeId) => {
     // Create a copy of the planner to avoid mutating state directly
     const updatedPlanner = { ...planner };

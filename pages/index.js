@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import Header from "@/components/Header";
 import Featured from "@/components/Featured";
+import Footer from "@/components/Footer";
 import { Recipe } from "@/models/Recipe";
 import { mongooseConnect } from "@/lib/mongoose";
 import NewRecipes from "@/components/NewRecipes";
@@ -8,6 +9,7 @@ import SearchBar from "@/components/SearchBar";
 import SideWindow from "@/components/SideWindow";
 import styled from "styled-components";
 import ScrollToTopButton from "@/components/ScrollToTop";
+import { BagContext } from "@/components/BagContext";
 
 const IconButtons = styled.div`
   width: 40px;
@@ -31,8 +33,26 @@ const Icon = styled.svg`
   height: 16px;
 `;
 
+const BagLength = styled.span`
+  font-size: 10px;
+  position: absolute;
+  height: 8px;
+  width: 8px;
+  top: -5px;
+  right: -5px;
+  background-color: #FF0126;
+  color: #fff;
+  padding: 5px;
+  border-radius: 50%;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
 export default function HomePage({ featuredRecipes, newRecipes }) {
   const [isSideWindowOpen, setIsSideWindowOpen] = useState(false);
+  const { bagRecipes } = useContext(BagContext);
 
   const toggleSideWindow = () => {
     setIsSideWindowOpen(!isSideWindowOpen);
@@ -45,20 +65,15 @@ export default function HomePage({ featuredRecipes, newRecipes }) {
 
   return (
     <div>
-      <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap"
-        rel="stylesheet"
-      />
       <div style={mainContentStyle}>
         <Header />
         <Featured recipes={featuredRecipes} />
         <SearchBar />
         <NewRecipes recipes={newRecipes} />
         <ScrollToTopButton />
+        <Footer />
       </div>
-      <SideWindow isOpen={isSideWindowOpen} onClose={toggleSideWindow}>
-        <p>Side Window Content</p>
-      </SideWindow>
+      <SideWindow isOpen={isSideWindowOpen} onClose={toggleSideWindow} />
       <IconButtons
         className="icon-button"
         onClick={toggleSideWindow}
@@ -69,12 +84,18 @@ export default function HomePage({ featuredRecipes, newRecipes }) {
             <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clipRule="evenodd" />
           </Icon>
           ) : (
-          <Icon xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-            <path fillRule="evenodd" d="M7.5 6v.75H5.513c-.96 0-1.764.724-1.865 1.679l-1.263 12A1.875 1.875 0 004.25 22.5h15.5a1.875 1.875 0 001.865-2.071l-1.263-12a1.875 1.875 0 00-1.865-1.679H16.5V6a4.5 4.5 0 10-9 0zM12 3a3 3 0 00-3 3v.75h6V6a3 3 0 00-3-3zm-3 8.25a3 3 0 106 0v-.75a.75.75 0 011.5 0v.75a4.5 4.5 0 11-9 0v-.75a.75.75 0 011.5 0v.75z" clipRule="evenodd" />
-          </Icon>
+          <>
+              {bagRecipes.length > 0 && (
+                <BagLength>
+                  {bagRecipes.length}
+                </BagLength>
+              )}
+            <Icon xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+              <path fillRule="evenodd" d="M7.5 6v.75H5.513c-.96 0-1.764.724-1.865 1.679l-1.263 12A1.875 1.875 0 004.25 22.5h15.5a1.875 1.875 0 001.865-2.071l-1.263-12a1.875 1.875 0 00-1.865-1.679H16.5V6a4.5 4.5 0 10-9 0zM12 3a3 3 0 00-3 3v.75h6V6a3 3 0 00-3-3zm-3 8.25a3 3 0 106 0v-.75a.75.75 0 011.5 0v.75a4.5 4.5 0 11-9 0v-.75a.75.75 0 011.5 0v.75z" clipRule="evenodd" />
+            </Icon>
+          </>
         )}
       </IconButtons>
-
     </div>
   );
 }

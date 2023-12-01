@@ -9,10 +9,6 @@ import React from 'react';
 import { useDrop } from 'react-dnd';
 import DraggableRecipe from '@/components/DraggableRecipe';
 
-const Bg = styled.div`
-    margin-bottom: 100px;
-`;
-
 const RecipeContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -20,7 +16,7 @@ const RecipeContainer = styled.div`
   user-select: none;
 `;
 
-export default function TestPage() {
+export default function PlannerPage() {
   const { bagRecipes } = useContext(BagContext);
   const [recipes, setRecipes] = useState([]);
 
@@ -52,15 +48,10 @@ export default function TestPage() {
   });
 
   return (
-    <Bg>
-     <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap"
-        rel="stylesheet"
-    />
+    <>
       <Header />
       <Center>
         <h2>My Planner</h2>
-
         {recipes.length > 0 ? (
           <div>
             <h3>Recipes in the Bag:</h3>
@@ -76,9 +67,8 @@ export default function TestPage() {
         ) : (
           <div>Your bag is empty.</div>
         )}
-
         <WeekCalendar />
-      </Center>
-    </Bg>
+        </Center>
+    </>
   );
 }

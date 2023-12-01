@@ -8,6 +8,7 @@ import BagIcon from "./icons/BagIcon";
 import HamburgerIcon from "./icons/Hamburger";
 import axios from "axios";
 import CoursesDropdown from "./Dropdown";
+import { signOut, useSession } from "next-auth/react";
 
 const StyledHeader = styled.header`
     background-color: #111;
@@ -62,16 +63,6 @@ const NavLink = styled(Link)`
     }
 `;
 
-const BagInfo = styled.div`
-    display: flex; 
-    align-items: center;
-    font-size: 14px;
-`;
-
-const BagIconContainer = styled.div`
-    width: 24px;
-`;
-
 const NavButton = styled.button`
     background-color: transparent;
     width: 40px;
@@ -86,11 +77,39 @@ const NavButton = styled.button`
     }
 `;
 
+const ButtonsWrapper = styled.div`
+    display: flex;
+    gap: 10px;
+`;
+
+const Logout = styled.button`
+  display: block;
+  color: #aaa;
+  text-decoration: none;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-size: 16px;
+  padding: 5px 0;
+  
+  &:hover {
+    color: #fff;
+    transition: all .4s;
+  }
+
+  @media screen and (min-width: 768px) {
+    padding: 0;
+  }
+`;
+
 export default function Header() {
-    const { bagRecipes } = useContext(BagContext);
     const router = useRouter();
     const [coursesCategories, setCoursesCategories] = useState([]);
     const [dietaryCategories, setDietaryCategories] = useState([]);
+    const [mobileNavActive, setMobileNavActive] = useState(false);
+    const session = useSession();
+    const status = session.status;
 
     useEffect(() => {
     const fetchDietaryCategories = async () => {
@@ -133,7 +152,7 @@ export default function Header() {
   
     return (
       <div>
-        <StyledHeader>
+        <StyledHeader mobileNavActive={mobileNavActive}>
           <Center>
             <Wrapper>
               <Logo href={"/"}>MealGrub</Logo>
@@ -161,20 +180,27 @@ export default function Header() {
                 </NavLink>
                 <CoursesDropdown categories={coursesCategories} label="Courses" />
                 <CoursesDropdown categories={dietaryCategories} label="By Diet" />
-                {/* <NavLink href={"/bag"} isActive={router.pathname === "/bag"}>
-                  <BagInfo>
-                    <BagIconContainer>
-                      <BagIcon />
-                    </BagIconContainer>
-                    ({bagRecipes?.length})
-                  </BagInfo>
-                </NavLink> */}
-                <NavLink href={"/signup"} isActive={router.pathname === "/signup"}>
-                  Sign up
-                </NavLink>
-                <NavLink href={"/signin"} isActive={router.pathname === "/signin"}>
-                  Sign in
-                </NavLink>
+                <ButtonsWrapper>
+                  {status === 'authenticated' && (
+                    <>
+                      <NavLink href={'/profile'}>Profile</NavLink>
+                      <Logout
+                        onClick={() => signOut()}>
+                        Logout
+                      </Logout>
+                    </>
+                  )}
+                  {status === 'unauthenticated' && (
+                    <>
+                      <NavLink href={"/register"} isActive={router.pathname === "/register"}>
+                        Sign up
+                      </NavLink>
+                      <NavLink href={"/login"} isActive={router.pathname === "/login"}>
+                        Sign in
+                      </NavLink>
+                    </>
+                  )}
+                </ButtonsWrapper>
               </StyledNav>
               <NavButton onClick={() => setMobileNavActive((prev) => !prev)}>
                 <HamburgerIcon />
