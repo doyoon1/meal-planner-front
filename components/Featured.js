@@ -107,16 +107,6 @@ export default function Featured({ recipes }) {
   const [modalImages, setModalImages] = useState([]);
   const sliderRef = useRef(null);
 
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     if (sliderRef.current) {
-  //       sliderRef.current.slickNext();
-  //     }
-  //   }, 5000);
-
-  //   return () => clearInterval(interval);
-  // }, []);
-
   function addFeaturedToBag(recipeId) {
     addRecipe(recipeId);
   }

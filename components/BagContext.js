@@ -1,29 +1,34 @@
-// BagContext.js
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState } from 'react';
+import axios from 'axios';
+import { useSession } from 'next-auth/react';
 
 export const BagContext = createContext({});
 
-export function BagContextProvider({ children }) {
-  const ls = typeof window !== "undefined" ? window.localStorage : null;
-  const [bagRecipes, setBagRecipes] = useState([]);
-
-  useEffect(() => {
-    if (ls && ls.getItem("bag")) {
-      setBagRecipes(JSON.parse(ls.getItem("bag")));
-    }
-  }, [ls]);
-
-  useEffect(() => {
-    if (bagRecipes?.length > 0) {
-      ls?.setItem("bag", JSON.stringify(bagRecipes));
-    } else {
-      ls?.removeItem("bag");
-    }
-  }, [bagRecipes, ls]);
+export function BagContextProvider({ user, children }) {
+  const { data: session } = useSession();
+  const [bagRecipes, setBagRecipes] = useState(user?.bag || []);
 
   function addRecipe(recipeId) {
+    if (!session) {
+      console.error('User not logged in.');
+      // You can redirect to the login page or show a login prompt here
+      return;
+    }
+
+    const userId = session.user._id;
+
     if (!bagRecipes.includes(recipeId)) {
       setBagRecipes((prev) => [...prev, recipeId]);
+
+      // Save the updated bag to the database
+      axios.post('/api/updateBag', { userId, recipeId }, { withCredentials: true })
+        .then(response => {
+          // Handle success if needed
+        })
+        .catch(error => {
+          // Handle error if needed
+          console.error('Error saving recipe to bag:', error);
+        });
     }
   }
 

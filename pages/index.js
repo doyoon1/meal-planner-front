@@ -10,6 +10,7 @@ import SideWindow from "@/components/SideWindow";
 import styled from "styled-components";
 import ScrollToTopButton from "@/components/ScrollToTop";
 import { BagContext } from "@/components/BagContext";
+import { getSession } from "next-auth/react";
 
 const IconButtons = styled.div`
   width: 40px;
@@ -50,9 +51,11 @@ const BagLength = styled.span`
   align-items: center;
 `;
 
-export default function HomePage({ featuredRecipes, newRecipes }) {
+export default function HomePage({ session, featuredRecipes, newRecipes }) {
   const [isSideWindowOpen, setIsSideWindowOpen] = useState(false);
   const { bagRecipes } = useContext(BagContext);
+
+  console.log("Session: ", session)
 
   const toggleSideWindow = () => {
     setIsSideWindowOpen(!isSideWindowOpen);
@@ -66,8 +69,9 @@ export default function HomePage({ featuredRecipes, newRecipes }) {
   return (
     <div>
       <div style={mainContentStyle}>
+        
         <Header />
-        <Featured recipes={featuredRecipes} />
+        <Featured recipes={featuredRecipes} session={session} />
         <SearchBar />
         <NewRecipes recipes={newRecipes} />
         <ScrollToTopButton />
@@ -100,15 +104,28 @@ export default function HomePage({ featuredRecipes, newRecipes }) {
   );
 }
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context) {
   await mongooseConnect();
+
+  // Fetch the session
+  const session = await getSession(context);
+
+  // If no session is found, redirect to the login page
+  if (!session) {
+    return {
+      redirect: {
+        destination: "/login",
+        permanent: false,
+      },
+    };
+  }
 
   // Query MongoDB to find featured recipes with "featured" field set to true
   const featuredRecipes = await Recipe.find({ featured: true });
 
   if (!featuredRecipes || featuredRecipes.length === 0) {
     return {
-      notFound: true, 
+      notFound: true,
     };
   }
 
@@ -116,6 +133,7 @@ export async function getServerSideProps() {
 
   return {
     props: {
+      session,
       featuredRecipes: JSON.parse(JSON.stringify(featuredRecipes)),
       newRecipes: JSON.parse(JSON.stringify(newRecipes)),
     },

@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
-import styled from "styled-components";
-import { useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { BagContext } from "./BagContext";
 import { useContext } from "react";
 import PlannerModal from "./PlannerModal";
+import styled from "styled-components";
+import axios from "axios";
+import StarRatings from 'react-star-ratings';
 
 const ModalBackground = styled.div`
   position: fixed;
@@ -195,6 +196,18 @@ const Servings = styled.p`
   font-weight: 500;
 `;
 
+const RatingsWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 10px;
+`;
+
+const AverageRating = styled.p`
+  font-size: 14px;
+  margin: 0 0 4px 8px;
+`;
+
 function RecipeModal({ isOpen, closeModal, recipe }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const { bagRecipes, addRecipe, removeRecipe } = useContext(BagContext);
@@ -202,6 +215,60 @@ function RecipeModal({ isOpen, closeModal, recipe }) {
   const isRecipeInBag = bagRecipes?.includes(recipe?._id);
   const MAX_DESCRIPTION_WORDS = 40;
   const [plannerModalIsOpen, setPlannerModalIsOpen] = useState(false);
+  const [averageRating, setAverageRating] = useState('0');
+  const [ratings, setRatings] = useState([]);
+  
+  useEffect(() => {
+    const fetchRatings = async () => {
+      try {
+        console.log('Recipe ID for fetching ratings:', recipe._id);
+  
+        const response = await axios.get(`/api/rate?recipeId=${recipe._id.toString()}`);
+        setRatings(response.data.ratings);
+      } catch (error) {
+        console.error('Error fetching ratings:', error);
+      }
+    };
+  
+    if (isOpen && recipe) {
+      fetchRatings();
+    }
+  }, [isOpen, recipe]);
+  
+  const handleRateRecipe = async (value) => {
+    try {
+      const floatValue = parseFloat(value);
+      console.log('Float Value:', floatValue);
+  
+      const response = await axios.post('/api/rate', {
+        recipeId: recipe._id,
+        value: floatValue,
+      });
+  
+      if (response.data.success) {
+        console.log('New Rating Value:', response.data.rating.value);
+  
+        // Update state using the functional form
+        setRatings((prevRatings) => [...prevRatings, response.data.rating]);
+  
+        // Calculate average rating immediately after adding a new rating
+        const totalRating = ratings.reduce((acc, rating) => acc + rating.value, 0) + response.data.rating.value;
+        const avgRating = totalRating / (ratings.length + 1);
+        setAverageRating(avgRating.toFixed(1)); // Convert to string here
+      } else {
+        console.error('Failed to insert rating:', response.data.error);
+      }
+    } catch (error) {
+      console.error('Error submitting rating:', error);
+    }
+  };
+  
+  useEffect(() => {
+    // Calculate average rating whenever ratings change
+    const totalRating = ratings.reduce((acc, rating) => acc + rating.value, 0);
+    const avgRating = ratings.length ? totalRating / ratings.length : 0;
+    setAverageRating(avgRating);
+  }, [ratings]);  
 
   const togglePlannerModal = () => {
     setPlannerModalIsOpen(!plannerModalIsOpen);
@@ -270,6 +337,18 @@ function RecipeModal({ isOpen, closeModal, recipe }) {
           <Title>{recipe.title}</Title>
           <Description>{truncateDescription(recipe.description)}</Description>
           <Servings>Servings: {recipe.servings}</Servings>
+          <RatingsWrapper>
+            <StarRatings
+              rating={parseFloat(averageRating)}
+              starRatedColor="#ffd700"
+              changeRating={(newRating) => handleRateRecipe(newRating)}
+              numberOfStars={5}
+              name='rating'
+              starDimension="20px"
+              starSpacing="2px"
+            />
+            <AverageRating>Average {parseFloat(averageRating).toFixed(1)} / 5 out of {ratings.length} ratings</AverageRating>
+          </RatingsWrapper>
           <ModalButtonsWrapper>
             <ModalButtons href={url} target="_blank" rel="noopener noreferrer">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">

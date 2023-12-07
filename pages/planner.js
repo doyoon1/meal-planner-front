@@ -8,6 +8,8 @@ import WeekCalendar from '@/components/Planner';
 import React from 'react';
 import { useDrop } from 'react-dnd';
 import DraggableRecipe from '@/components/DraggableRecipe';
+import { useSession } from "next-auth/react";
+import { getUserFromToken } from "@/utils/authUtils";
 
 const RecipeContainer = styled.div`
   display: flex;
@@ -19,6 +21,24 @@ const RecipeContainer = styled.div`
 export default function PlannerPage() {
   const { bagRecipes } = useContext(BagContext);
   const [recipes, setRecipes] = useState([]);
+  const { data: session, status } = useSession();
+
+  if (status === "authenticated") {
+    // Log the entire session data
+    console.log("Session Data:", session);
+
+    // Retrieve and log the user data from the session token
+    const userData = getUserFromToken(session?.token);
+    if (userData) {
+      console.log('User Data:', userData);
+    } else {
+      console.log('User Data not found');
+    }
+  }
+  
+  if (status === "unauthenticated") {
+    console.log("unauthenticated");
+  }
 
   useEffect(() => {
     if (bagRecipes.length === 0) {

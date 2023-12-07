@@ -25,12 +25,24 @@ export const authOptions = {
           const passwordOk = user && bcrypt.compareSync(password, user.password);
 
           if (passwordOk) {
-            return user;
+            return Promise.resolve(user);
           }
-          return null
+          
+          return Promise.resolve(null);
         }
       }),
   ],
+  callbacks: {
+    jwt: async ({ token, user }) => {
+      user && (token.user = user);
+      return token;
+    },
+    session: async ({ session, token }) => {
+      session.user = token.user;
+      return session;
+    },
+  },
+  session: { strategy: "jwt", maxAge: 24 * 60 * 60 },
 }
 
 export default NextAuth(authOptions)

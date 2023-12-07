@@ -8,7 +8,7 @@ import SearchBar from "@/components/RecipeSearch";
 import { useState, useContext } from "react";
 import SideWindow from "@/components/SideWindow";
 import ScrollToTopButton from "@/components/ScrollToTop";
-import { Pagination } from 'antd';
+import { Pagination } from 'antd/dist/antd';
 import { useRouter } from 'next/router';
 import { BagContext } from "@/components/BagContext";
 

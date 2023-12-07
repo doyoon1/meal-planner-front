@@ -6,7 +6,7 @@ import Category from '@/models/Category';
 import Center from '@/components/Center';
 import styled from 'styled-components';
 import ScrollToTopButton from '@/components/ScrollToTop';
-import { Pagination } from 'antd';
+import { Pagination } from 'antd/dist/antd';
 import { useState, useContext } from 'react';
 import { useRouter } from 'next/router';
 import { BagContext } from '@/components/BagContext';
