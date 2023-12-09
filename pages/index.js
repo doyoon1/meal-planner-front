@@ -55,7 +55,15 @@ export default function HomePage({ session, featuredRecipes, newRecipes }) {
   const [isSideWindowOpen, setIsSideWindowOpen] = useState(false);
   const { bagRecipes } = useContext(BagContext);
 
-  console.log("Session: ", session)
+  const fetchSession = async () => {
+    try {
+      const response = await fetch('/api/session');
+      const data = await response.json();
+      console.log('Session from API:', data.session);
+    } catch (error) {
+      console.error('Error fetching session from API:', error);
+    }
+  };
 
   const toggleSideWindow = () => {
     setIsSideWindowOpen(!isSideWindowOpen);
@@ -69,15 +77,14 @@ export default function HomePage({ session, featuredRecipes, newRecipes }) {
   return (
     <div>
       <div style={mainContentStyle}>
-        
         <Header />
         <Featured recipes={featuredRecipes} session={session} />
-        <SearchBar />
-        <NewRecipes recipes={newRecipes} />
-        <ScrollToTopButton />
-        <Footer />
+        <SearchBar session={session} />
+        <NewRecipes recipes={newRecipes} session={session} />
+        <ScrollToTopButton session={session} />
+        <Footer session={session} />
       </div>
-      <SideWindow isOpen={isSideWindowOpen} onClose={toggleSideWindow} />
+      <SideWindow isOpen={isSideWindowOpen} onClose={toggleSideWindow} session={session} />
       <IconButtons
         className="icon-button"
         onClick={toggleSideWindow}
@@ -89,9 +96,9 @@ export default function HomePage({ session, featuredRecipes, newRecipes }) {
           </Icon>
           ) : (
           <>
-              {bagRecipes.length > 0 && (
+              {bagRecipes?.length > 0 && (
                 <BagLength>
-                  {bagRecipes.length}
+                  {bagRecipes?.length}
                 </BagLength>
               )}
             <Icon xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
@@ -109,16 +116,6 @@ export async function getServerSideProps(context) {
 
   // Fetch the session
   const session = await getSession(context);
-
-  // If no session is found, redirect to the login page
-  if (!session) {
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    };
-  }
 
   // Query MongoDB to find featured recipes with "featured" field set to true
   const featuredRecipes = await Recipe.find({ featured: true });

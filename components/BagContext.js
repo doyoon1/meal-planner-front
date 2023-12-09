@@ -4,36 +4,55 @@ import { useSession } from 'next-auth/react';
 
 export const BagContext = createContext({});
 
-export function BagContextProvider({ user, children }) {
+export function BagContextProvider({ children }) {
   const { data: session } = useSession();
-  const [bagRecipes, setBagRecipes] = useState(user?.bag || []);
+  const [bagRecipes, setBagRecipes] = useState([]);
 
-  function addRecipe(recipeId) {
+  useEffect(() => {
+    // Fetch the initial bag data when the component mounts
+    if (session) {
+      axios.get(`/api/bag?userId=${session.user._id}`)
+        .then(response => {
+          setBagRecipes(response.data.bag);
+        })
+        .catch(error => {
+          console.error('Error fetching user bag:', error);
+        });
+    }
+  }, [session]);
+
+  function manageRecipe(action, recipeId) {
     if (!session) {
       console.error('User not logged in.');
-      // You can redirect to the login page or show a login prompt here
       return;
     }
 
     const userId = session.user._id;
 
-    if (!bagRecipes.includes(recipeId)) {
-      setBagRecipes((prev) => [...prev, recipeId]);
+    axios.post('/api/bag', { userId, recipeId, action }, { withCredentials: true })
+      .then(response => {
+        // Handle success if needed
+        // Fetch the updated bag data after successful update
+        axios.get(`/api/bag?userId=${userId}`)
+          .then(response => {
+            setBagRecipes(response.data.bag);
+          })
+          .catch(error => {
+            console.error('Error fetching updated bag data:', error);
+          });
+      })
+      .catch(error => {
+        // Handle error if needed
+        console.error('Error managing recipe in bag:', error);
+      });
+  }
 
-      // Save the updated bag to the database
-      axios.post('/api/updateBag', { userId, recipeId }, { withCredentials: true })
-        .then(response => {
-          // Handle success if needed
-        })
-        .catch(error => {
-          // Handle error if needed
-          console.error('Error saving recipe to bag:', error);
-        });
-    }
+  function addRecipe(recipeId) {
+    manageRecipe('add', recipeId);
   }
 
   function removeRecipe(recipeId) {
-    setBagRecipes((prev) => prev.filter((id) => id !== recipeId));
+    manageRecipe('remove', recipeId);
   }
 
   return (

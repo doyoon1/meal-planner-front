@@ -44,8 +44,7 @@ const SearchIcon = styled.svg`
 `;
 
 export default function SearchBar({ initialValue }) {
-    const [searchQuery, setSearchQuery] = useState(initialValue);
-  
+    const [searchQuery, setSearchQuery] = useState(initialValue);  
     const router = useRouter();
   
     const handleSearch = async () => {

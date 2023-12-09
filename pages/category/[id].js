@@ -11,6 +11,7 @@ import { useState, useContext } from 'react';
 import { useRouter } from 'next/router';
 import { BagContext } from '@/components/BagContext';
 import SideWindow from '@/components/SideWindow';
+import { useSession } from 'next-auth/react';
 
 const IconButtons = styled.div`
   width: 40px;
@@ -122,6 +123,7 @@ export default function CategoryPage({ category, recipes }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [isSideWindowOpen, setIsSideWindowOpen] = useState(false);
   const {bagRecipes} = useContext(BagContext);
+  const { data:session } = useSession();
 
   const toggleSideWindow = () => {
     setIsSideWindowOpen(!isSideWindowOpen);
@@ -157,7 +159,7 @@ export default function CategoryPage({ category, recipes }) {
             {category?.name}
             <RecipeCount>{`${totalRecipes} recipes`}</RecipeCount>
           </CategoryTitle>
-          <RecipesGrid recipes={paginatedRecipes} />
+          <RecipesGrid recipes={paginatedRecipes} session={session} />
           <StyledPagination
             current={currentPage}
             total={totalPages * 15}

@@ -32,7 +32,7 @@ const SeeMoreLink = styled.div`
   }
 `;
 
-export default function NewRecipes({ recipes }) {
+export default function NewRecipes({ recipes, session }) {
   return (
     <Center>
       <TitleContainer>
@@ -41,7 +41,7 @@ export default function NewRecipes({ recipes }) {
           <SeeMoreLink>See All</SeeMoreLink>
         </SeeMore>
       </TitleContainer>
-      <RecipesGrid recipes={recipes} />
+      <RecipesGrid recipes={recipes} session={session}/>
     </Center>
   );
 }

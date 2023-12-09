@@ -6,21 +6,22 @@ import Center from "@/components/Center";
 import styled from "styled-components";
 import SearchResults from "@/components/SearchResults";
 
-export default function SearchPage({ recipes, query }) {
-  const SearchTitle = styled.h1`
-    font-size: 2.5rem;
-    margin: 10px 0 20px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  `;
+const SearchTitle = styled.h1`
+font-size: 2.5rem;
+margin: 10px 0 20px;
+font-weight: 500;
+display: flex;
+align-items: center;
+justify-content: space-between;
+`;
 
-  const RecipeCount = styled.p`
-    font-size: 1.2rem;
-    margin: 0;
-    color: #777;
-  `;
+const RecipeCount = styled.p`
+font-size: 1.2rem;
+margin: 0;
+color: #777;
+`;
+
+export default function SearchPage({ recipes, query }) {
 
   return (
     <div>

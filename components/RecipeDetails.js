@@ -208,67 +208,71 @@ const AverageRating = styled.p`
   margin: 0 0 4px 8px;
 `;
 
-function RecipeModal({ isOpen, closeModal, recipe }) {
+function RecipeModal({ isOpen, closeModal, recipe, session }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const { bagRecipes, addRecipe, removeRecipe } = useContext(BagContext);
   const url = '/recipe/' + recipe?._id;
   const isRecipeInBag = bagRecipes?.includes(recipe?._id);
   const MAX_DESCRIPTION_WORDS = 40;
   const [plannerModalIsOpen, setPlannerModalIsOpen] = useState(false);
-  const [averageRating, setAverageRating] = useState('0');
-  const [ratings, setRatings] = useState([]);
-  
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalRatings, setTotalRatings] = useState(0);
+  const [userRating, setUserRating] = useState(averageRating);
+
   useEffect(() => {
-    const fetchRatings = async () => {
-      try {
-        console.log('Recipe ID for fetching ratings:', recipe._id);
-  
-        const response = await axios.get(`/api/rate?recipeId=${recipe._id.toString()}`);
-        setRatings(response.data.ratings);
-      } catch (error) {
-        console.error('Error fetching ratings:', error);
-      }
-    };
-  
-    if (isOpen && recipe) {
-      fetchRatings();
+    // Fetch the average and total ratings when the modal is opened
+    if (isOpen) {
+      axios
+        .get(`/api/getRecipeRatings?recipeId=${recipe._id}`)
+        .then((response) => {
+          const { average, total } = response.data;
+          setAverageRating(average);
+          setTotalRatings(total);
+          // Update userRating to the averageRating
+          setUserRating(average);
+        })
+        .catch((error) => {
+          console.error("Error fetching recipe ratings:", error);
+        });
     }
-  }, [isOpen, recipe]);
+  }, [isOpen, recipe?._id]);
+
+  const handleRatingChange = (newRating) => {
+    // Check if there is a valid session
+    if (!session || !session.user || !session.user._id) {
+      console.log("Unauthenticated");
+      return;
+    }
   
-  const handleRateRecipe = async (value) => {
-    try {
-      const floatValue = parseFloat(value);
-      console.log('Float Value:', floatValue);
+    setUserRating(newRating);
   
-      const response = await axios.post('/api/rate', {
-        recipeId: recipe._id,
-        value: floatValue,
+    // Save the rating to the database
+    axios
+      .post(
+        "/api/rateRecipes",
+        { userId: session.user._id, recipeId: recipe._id, value: newRating },
+        { withCredentials: true }
+      )
+      .then((response) => {
+        // Handle success if needed
+  
+        // Fetch and update the average rating
+        axios
+          .get(`/api/getRecipeRatings?recipeId=${recipe._id}`)
+          .then((response) => {
+            const { average, total } = response.data;
+            setAverageRating(average);
+            setTotalRatings(total);
+          })
+          .catch((error) => {
+            console.error("Error fetching recipe ratings:", error);
+          });
+      })
+      .catch((error) => {
+        // Handle error if needed
+        console.error("Error rating recipe:", error);
       });
-  
-      if (response.data.success) {
-        console.log('New Rating Value:', response.data.rating.value);
-  
-        // Update state using the functional form
-        setRatings((prevRatings) => [...prevRatings, response.data.rating]);
-  
-        // Calculate average rating immediately after adding a new rating
-        const totalRating = ratings.reduce((acc, rating) => acc + rating.value, 0) + response.data.rating.value;
-        const avgRating = totalRating / (ratings.length + 1);
-        setAverageRating(avgRating.toFixed(1)); // Convert to string here
-      } else {
-        console.error('Failed to insert rating:', response.data.error);
-      }
-    } catch (error) {
-      console.error('Error submitting rating:', error);
-    }
-  };
-  
-  useEffect(() => {
-    // Calculate average rating whenever ratings change
-    const totalRating = ratings.reduce((acc, rating) => acc + rating.value, 0);
-    const avgRating = ratings.length ? totalRating / ratings.length : 0;
-    setAverageRating(avgRating);
-  }, [ratings]);  
+  };  
 
   const togglePlannerModal = () => {
     setPlannerModalIsOpen(!plannerModalIsOpen);
@@ -338,16 +342,18 @@ function RecipeModal({ isOpen, closeModal, recipe }) {
           <Description>{truncateDescription(recipe.description)}</Description>
           <Servings>Servings: {recipe.servings}</Servings>
           <RatingsWrapper>
-            <StarRatings
-              rating={parseFloat(averageRating)}
-              starRatedColor="#ffd700"
-              changeRating={(newRating) => handleRateRecipe(newRating)}
-              numberOfStars={5}
-              name='rating'
-              starDimension="20px"
-              starSpacing="2px"
-            />
-            <AverageRating>Average {parseFloat(averageRating).toFixed(1)} / 5 out of {ratings.length} ratings</AverageRating>
+          <StarRatings
+            rating={userRating}
+            starRatedColor="#F5533D"
+            changeRating={handleRatingChange}
+            numberOfStars={5}
+            name="userRating"
+            starDimension="20px"
+            starSpacing="2px"
+          />
+            <AverageRating>
+              Average {parseFloat(averageRating).toFixed(1)} / 5 out of {totalRatings} ratings
+            </AverageRating>          
           </RatingsWrapper>
           <ModalButtonsWrapper>
             <ModalButtons href={url} target="_blank" rel="noopener noreferrer">

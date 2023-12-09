@@ -10,27 +10,27 @@ export const authOptions = {
   secret: process.env.SECRET,
   providers: [
     CredentialsProvider({
-        name: "Credentials",
-        id: 'credentials',
-        credentials: {
-          username: { label: "Email", type: "email", placeholder: "test@example.com" },
-          password: { label: "Password", type: "password" }
-        },
-        async authorize(credentials, req) {
-          const email = credentials?.email;
-          const password = credentials?.password;
+      name: "Credentials",
+      id: 'credentials',
+      credentials: {
+        username: { label: "Email", type: "email", placeholder: "test@example.com" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials, req) {
+        const email = credentials?.email;
+        const password = credentials?.password;
 
-          mongoose.connect(process.env.MONGODB_URI);
-          const user = await UserAccounts.findOne({email});
-          const passwordOk = user && bcrypt.compareSync(password, user.password);
+        mongoose.connect(process.env.MONGODB_URI);
+        const user = await UserAccounts.findOne({ email });
+        const passwordOk = user && bcrypt.compareSync(password, user.password);
 
-          if (passwordOk) {
-            return Promise.resolve(user);
-          }
-          
-          return Promise.resolve(null);
+        if (passwordOk) {
+          return Promise.resolve(user);
         }
-      }),
+
+        return Promise.resolve(null);
+      }
+    }),
   ],
   callbacks: {
     jwt: async ({ token, user }) => {
@@ -38,11 +38,18 @@ export const authOptions = {
       return token;
     },
     session: async ({ session, token }) => {
-      session.user = token.user;
+      // Fetch user from the database based on the user's ID
+      const user = await UserAccounts.findById(token.user._id);
+
+      // If user is found, update the session
+      if (user) {
+        session.user = user;
+      }
+
       return session;
     },
   },
   session: { strategy: "jwt", maxAge: 24 * 60 * 60 },
 }
 
-export default NextAuth(authOptions)
+export default NextAuth(authOptions);
