@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 import { useState } from 'react';
+import NavBar from '@/components/Navbar';
 
 const StyledComponent = styled.div`
   background-image: url('/loginbg.png');
@@ -142,14 +143,14 @@ export default function LoginPage() {
     ev.preventDefault();
 		setLoginInProgress(true);
 
-		await signIn('credentials', {email, password, callbackUrl: '/'});
+		await signIn('credentials', {email, password, callbackUrl: '/home'});
 
 		setLoginInProgress(false);
   }
 
   return (
     <>
-      <Header />
+      <NavBar />
       <StyledComponent>
         <Center>
           <FormContainer onSubmit={handleFormSubmit}>

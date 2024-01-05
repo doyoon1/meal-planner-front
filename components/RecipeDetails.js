@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
-import styled from "styled-components";
-import { useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { BagContext } from "./BagContext";
 import { useContext } from "react";
 import PlannerModal from "./PlannerModal";
+import styled from "styled-components";
+import axios from "axios";
+import StarRatings from 'react-star-ratings';
 
 const ModalBackground = styled.div`
   position: fixed;
@@ -40,7 +41,7 @@ const LargeImage = styled.img`
   height: 250px;
   width: 100%;
   border-radius: 4px;
-  object-fit: contain; /* Use 'cover' or 'contain' based on your preference */
+  object-fit: contain;
 `;
 
 
@@ -195,13 +196,83 @@ const Servings = styled.p`
   font-weight: 500;
 `;
 
-function RecipeModal({ isOpen, closeModal, recipe }) {
+const RatingsWrapper = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-top: 10px;
+`;
+
+const AverageRating = styled.p`
+  font-size: 14px;
+  margin: 0 0 4px 8px;
+`;
+
+function RecipeModal({ isOpen, closeModal, recipe, session }) {
   const [selectedImage, setSelectedImage] = useState(null);
   const { bagRecipes, addRecipe, removeRecipe } = useContext(BagContext);
   const url = '/recipe/' + recipe?._id;
   const isRecipeInBag = bagRecipes?.includes(recipe?._id);
   const MAX_DESCRIPTION_WORDS = 40;
   const [plannerModalIsOpen, setPlannerModalIsOpen] = useState(false);
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalRatings, setTotalRatings] = useState(0);
+  const [userRating, setUserRating] = useState(averageRating);
+
+  useEffect(() => {
+    // Fetch the average and total ratings when the modal is opened
+    if (isOpen) {
+      axios
+        .get(`/api/getRecipeRatings?recipeId=${recipe._id}`)
+        .then((response) => {
+          const { average, total } = response.data;
+          setAverageRating(average);
+          setTotalRatings(total);
+          // Update userRating to the averageRating
+          setUserRating(average);
+        })
+        .catch((error) => {
+          console.error("Error fetching recipe ratings:", error);
+        });
+    }
+  }, [isOpen, recipe?._id]);
+
+  const handleRatingChange = (newRating) => {
+    // Check if there is a valid session
+    if (!session || !session.user || !session.user._id) {
+      console.log("Unauthenticated");
+      return;
+    }
+  
+    setUserRating(newRating);
+  
+    // Save the rating to the database
+    axios
+      .post(
+        "/api/rateRecipes",
+        { userId: session.user._id, recipeId: recipe._id, value: newRating },
+        { withCredentials: true }
+      )
+      .then((response) => {
+        // Handle success if needed
+  
+        // Fetch and update the average rating
+        axios
+          .get(`/api/getRecipeRatings?recipeId=${recipe._id}`)
+          .then((response) => {
+            const { average, total } = response.data;
+            setAverageRating(average);
+            setTotalRatings(total);
+          })
+          .catch((error) => {
+            console.error("Error fetching recipe ratings:", error);
+          });
+      })
+      .catch((error) => {
+        // Handle error if needed
+        console.error("Error rating recipe:", error);
+      });
+  };  
 
   const togglePlannerModal = () => {
     setPlannerModalIsOpen(!plannerModalIsOpen);
@@ -270,6 +341,20 @@ function RecipeModal({ isOpen, closeModal, recipe }) {
           <Title>{recipe.title}</Title>
           <Description>{truncateDescription(recipe.description)}</Description>
           <Servings>Servings: {recipe.servings}</Servings>
+          <RatingsWrapper>
+          <StarRatings
+            rating={userRating}
+            starRatedColor="#F5533D"
+            changeRating={handleRatingChange}
+            numberOfStars={5}
+            name="userRating"
+            starDimension="20px"
+            starSpacing="2px"
+          />
+            <AverageRating>
+              Average {parseFloat(averageRating).toFixed(1)} / 5 out of {totalRatings} ratings
+            </AverageRating>          
+          </RatingsWrapper>
           <ModalButtonsWrapper>
             <ModalButtons href={url} target="_blank" rel="noopener noreferrer">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
@@ -309,7 +394,8 @@ function RecipeModal({ isOpen, closeModal, recipe }) {
             <PlannerModal 
             isOpen={plannerModalIsOpen} 
             closeModal={togglePlannerModal}
-            recipe={recipe} />
+            recipe={recipe}
+            session={session} />
           </ModalBackground>
         </>
       )}

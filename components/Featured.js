@@ -86,17 +86,17 @@ const DotsWrapper = styled.div`
   }
 
   button {
-    width: 10px; /* Adjust the width of the dots */
-    height: 10px; /* Adjust the height of the dots */
+    width: 10px;
+    height: 10px; 
     border: none;
-    background-color: #fff; /* Set the color of the dots */
+    background-color: #fff;
     border-radius: 50%;
     cursor: pointer;
     transition: background-color 0.3s ease;
 
     &:hover,
     &.slick-active {
-      background-color: #fff; /* Set the color of the active dot */
+      background-color: #fff;
     }
   }
 `;
@@ -106,16 +106,6 @@ export default function Featured({ recipes }) {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [modalImages, setModalImages] = useState([]);
   const sliderRef = useRef(null);
-
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     if (sliderRef.current) {
-  //       sliderRef.current.slickNext();
-  //     }
-  //   }, 5000);
-
-  //   return () => clearInterval(interval);
-  // }, []);
 
   function addFeaturedToBag(recipeId) {
     addRecipe(recipeId);

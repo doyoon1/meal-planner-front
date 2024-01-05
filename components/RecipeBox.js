@@ -29,10 +29,16 @@ const ImageWrapper = styled.div`
   flex-direction: column;
   overflow: hidden;
   position: relative;
+  transition: filter 0.5s ease-in-out;
+  filter: brightness(90%);
 
   background-image: url(${props => props.image});
   background-size: cover;
   background-position: center;
+
+  &:hover {
+    filter: brightness(100%);
+  }
 `;
 
 const NameWrapper = styled.div`

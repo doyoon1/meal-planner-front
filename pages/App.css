@@ -1,11 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=League+Spartan&family=Libre+Baskerville:ital@1&family=Poppins:wght@400;600;700&display=swap');
+
+* {
+  font-family: 'Poppins', sans-serif;
+}
 
 body {
   background: #F0F2F5;
   overflow-x: hidden;
   padding: 0;
   margin: 0;
-  font-family: 'Poppins', sans-serif;
 }
 
 h1 {

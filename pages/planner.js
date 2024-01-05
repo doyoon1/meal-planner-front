@@ -8,6 +8,8 @@ import WeekCalendar from '@/components/Planner';
 import React from 'react';
 import { useDrop } from 'react-dnd';
 import DraggableRecipe from '@/components/DraggableRecipe';
+import { useSession } from "next-auth/react";
+import PlannerDisplay from "@/components/PlannerDisplay";
 
 const RecipeContainer = styled.div`
   display: flex;
@@ -19,6 +21,7 @@ const RecipeContainer = styled.div`
 export default function PlannerPage() {
   const { bagRecipes } = useContext(BagContext);
   const [recipes, setRecipes] = useState([]);
+  const { data:session } = useSession();
 
   useEffect(() => {
     if (bagRecipes.length === 0) {
@@ -27,9 +30,9 @@ export default function PlannerPage() {
     }
 
     axios
-      .post('/api/bag', { ids: bagRecipes })
+      .post('/api/bagRecipes', { ids: bagRecipes })
       .then(response => {
-        console.log('Fetched recipes:', response.data);
+        // console.log('Fetched recipes:', response.data);
         setRecipes(response.data);
       })
       .catch(error => {
@@ -59,7 +62,7 @@ export default function PlannerPage() {
                 {bagRecipes.map(recipeId => {
                 const recipe = recipes.find(r => r._id === recipeId);
                 return recipe ? (
-                    <DraggableRecipe key={recipe._id} recipe={recipe} />
+                    <DraggableRecipe key={recipe._id} recipe={recipe} session={session} />
                 ) : null;
                 })}
             </RecipeContainer>
@@ -68,6 +71,7 @@ export default function PlannerPage() {
           <div>Your bag is empty.</div>
         )}
         <WeekCalendar />
+        <PlannerDisplay />
         </Center>
     </>
   );

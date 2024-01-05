@@ -13,7 +13,6 @@ const DropdownLabel = styled.div`
   cursor: pointer;
   color: #aaa;
   justify-content: space-between;
-
   &:hover {
     color: #fff;
   }

@@ -18,7 +18,6 @@ const Title = styled.h2`
 const SeeMore = styled(Link)`
     text-decoration: none;
     margin-top: 8px;
-
 `;
 
 const SeeMoreLink = styled.div`
@@ -32,16 +31,16 @@ const SeeMoreLink = styled.div`
   }
 `;
 
-export default function NewRecipes({ recipes }) {
+export default function NewRecipes({ recipes, session }) {
   return (
-    <Center>
+    <div>
       <TitleContainer>
         <Title>New Arrivals</Title>
         <SeeMore href="/recipes" passHref>
           <SeeMoreLink>See All</SeeMoreLink>
         </SeeMore>
       </TitleContainer>
-      <RecipesGrid recipes={recipes} />
-    </Center>
+      <RecipesGrid recipes={recipes} session={session}/>
+    </div>
   );
 }

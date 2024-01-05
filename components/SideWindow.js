@@ -130,7 +130,7 @@ const SideWindow = ({ isOpen }) => {
     const fetchRecipeDetails = async () => {
       const details = await Promise.all(
         bagRecipes.map(async (recipeId) => {
-          const response = await axios.post("/api/bag", { ids: [recipeId] });
+          const response = await axios.post("/api/bagRecipes", { ids: [recipeId] });
           return response.data[0];
         })
       );

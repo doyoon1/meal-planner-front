@@ -83,11 +83,11 @@ const CheckboxInput = styled.input`
   margin-right: 8px;
 `;
 
-const PlannerModal = ({ recipe, isOpen, closeModal }) => {
+const PlannerModal = ({ recipe, isOpen, closeModal, session }) => {
   const { addRecipeToDay } = useContext(PlannerContext);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
-  const [selectedDay, setSelectedDay] = useState("Monday"); // Initialize with a default day
-  const [selectedMeals, setSelectedMeals] = useState(["Breakfast"]); // Initialize with a default meal
+  const [selectedDay, setSelectedDay] = useState("Monday");
+  const [selectedMeals, setSelectedMeals] = useState(["Breakfast"]);
 
   useEffect(() => {
     // Update selectedRecipe when the recipe prop changes
@@ -114,10 +114,9 @@ const PlannerModal = ({ recipe, isOpen, closeModal }) => {
   const handleAddToPlanner = () => {
     if (selectedRecipe) {
       addRecipeToDay(selectedDay, selectedMeals, selectedRecipe);
-      console.log(localStorage.getItem("planner")); // Log the updated localStorage
       closeModal();
     }
-  };
+  };  
 
   return (
     isOpen && (

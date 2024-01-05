@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import { useDrop } from 'react-dnd';
 import { useDragLayer } from 'react-dnd';
 import { PlannerContext } from './PlannerContext';
+import { useSession } from 'next-auth/react';
+import axios from 'axios';
 
 const Bg = styled.div`
   margin-top: 20px;
@@ -130,16 +132,43 @@ const CloseButton = styled.span`
 const Planner = () => {
   const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
   const MealCategory = ['Breakfast', 'Lunch', 'Dinner', 'Other'];
-  const { planner, addRecipeToDay, removeRecipeFromDay } = useContext(PlannerContext);
+  const { planner, addRecipeToDay, removeRecipeFromDay, setPlanner } = useContext(PlannerContext);
   const [isClient, setIsClient] = useState(false);
+  const { data: session } = useSession();
 
   useEffect(() => {
-    console.log('Planner state:', planner);
+    console.log('Current Planner Data:', planner);
   }, [planner]);
+
+  const fetchPlannerData = async () => {
+    try {
+      const response = await axios.get("/api/planner");
+      // Initialize the planner state with entries for all days of the week
+      setPlanner(response.data || getDefaultPlanner());
+    } catch (error) {
+      console.error("Error fetching planner data:", error);
+    }
+  };
+
+  const getDefaultPlanner = () => {
+    // Create an object with entries for all days of the week, initialized as empty
+    const defaultPlanner = {};
+    daysOfWeek.forEach(day => {
+      defaultPlanner[day] = {};
+      MealCategory.forEach(meal => {
+        defaultPlanner[day][meal] = [];
+      });
+    });
+    return defaultPlanner;
+  };
 
   useEffect(() => {
     setIsClient(true);
-  }, []);
+    if (session) {
+      // Fetch the planner data from the database when the component mounts and session is available
+      fetchPlannerData(session.user._id);
+    }
+  }, [session]);
 
   const [, drop] = useDrop({
     accept: 'RECIPE',
@@ -156,7 +185,7 @@ const Planner = () => {
     },
   });
 
-  const DropTarget = ({ day, meal }) => {
+  const DropTarget = ({ day, meal, planner }) => {
     const [, drop] = useDrop({
       accept: 'RECIPE',
       drop: (item, monitor) => {
@@ -167,14 +196,16 @@ const Planner = () => {
         };
       },
   });
+  
+  const handleRemoveRecipe = (recipeId) => {
+    removeRecipeFromDay(day, meal, recipeId);
+  };
 
-    const handleRemoveRecipe = (recipeId) => {
-      removeRecipeFromDay(day, meal, recipeId);
-    };
-
-    return (
-      <div ref={drop} style={{ height: '100%' }}>
-        {planner[day]?.[meal]?.map((recipe) => (
+  return (
+    <div ref={drop} style={{ height: '100%' }}>
+      {planner[day]?.[meal]?.map((recipeId) => {
+        const recipe = findRecipeById(recipeId);
+        return (
           <RecipeContainer key={recipe._id}>
             <RecipeImage src={recipe.images?.[0]} alt={recipe.title} />
             <TitleButtonWrapper>
@@ -186,10 +217,11 @@ const Planner = () => {
               </CloseButton>
             </TitleButtonWrapper>
           </RecipeContainer>
-        ))}
-      </div>
-    );
-  };
+        );
+      })}
+    </div>
+  );
+};
 
   const collectedProps = useDragLayer((monitor) => ({
     isDragging: monitor.isDragging(),
@@ -207,12 +239,13 @@ const Planner = () => {
         </MealLabel>
       </LabelContainer>
       {isClient &&
+        planner &&
         daysOfWeek.map((day, index) => (
           <PlannerContainer key={day} index={index + 1}>
             <DayContainer>{day}</DayContainer>
             <ContentContainer>
               {MealCategory.map((meal) => (
-                <DropTarget key={`${day}-${meal}`} day={day} meal={meal} collectedProps={collectedProps} />
+                <DropTarget key={`${day}-${meal}`} day={day} meal={meal} planner={planner} />
               ))}
             </ContentContainer>
           </PlannerContainer>

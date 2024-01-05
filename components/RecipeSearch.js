@@ -63,7 +63,6 @@ export default function RecipeSearch({ initialValue }) {
           rel="stylesheet"
         />
         <StyledBg>
-          <Center>
             <SearchContainer>
               <SearchInput
                 type="text"
@@ -87,7 +86,6 @@ export default function RecipeSearch({ initialValue }) {
                 </SearchIcon>
               </SearchButton>
             </SearchContainer>
-          </Center>
         </StyledBg>
       </div>
     );

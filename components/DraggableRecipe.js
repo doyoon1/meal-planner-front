@@ -32,7 +32,7 @@ const RecipeTitle = styled.div`
   white-space: nowrap;
 `;
 
-const DraggableRecipe = ({ recipe }) => {
+const DraggableRecipe = ({ recipe, session }) => {
   const [{ isDragging }, drag] = useDrag({
     type: 'RECIPE',
     item: { recipe },

@@ -5,8 +5,9 @@ import RecipeModal from './ImageModal';
 const BigImage = styled.img`
   width: 100%;
   height: 34.12vw;
-  object-fit: cover;
-  background-position: center; 
+  object-fit: contain;
+  background-position: center;
+  background-color: #111;
 `;
 
 const RecipeImages = ({ images }) => {
