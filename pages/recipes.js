@@ -8,9 +8,18 @@ import SearchBar from "@/components/RecipeSearch";
 import { useState, useContext } from "react";
 import SideWindow from "@/components/SideWindow";
 import ScrollToTopButton from "@/components/ScrollToTop";
-import { Pagination } from 'antd';
+import { Pagination } from 'antd/dist/antd';
 import { useRouter } from 'next/router';
 import { BagContext } from "@/components/BagContext";
+import FilterWindow from "@/components/FilterIngredients";
+import { useSession } from "next-auth/react";
+
+const ContentContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+`;
 
 const Title = styled.h2`
     font-size: 2.5rem;
@@ -38,6 +47,12 @@ const IconButtons = styled.div`
 const Icon = styled.svg`
   width: 16px;
   height: 16px;
+`;
+
+const RecipeCount = styled.p`
+  font-size: 1.2rem;
+  margin: 0;
+  color: #777; /* You can choose the color you prefer */
 `;
 
 const StyledPagination = styled(Pagination)`
@@ -108,13 +123,40 @@ const BagLength = styled.span`
   align-items: center;
 `;
 
-const RecipesPage = ({ recipes, query, totalPages, currentPage }) => {
+const FilterWindowWrapper = styled.div`
+  opacity: ${(props) => (props.isOpen ? '1' : '0')};
+  transform: ${(props) => (props.isOpen ? 'translateY(0)' : 'translateY(-100%)')};
+  transition: opacity 0.3s, transform 0.3s;
+`;
+
+const RecipesPage = ({ recipes, query, totalPages, currentPage, totalRecipes }) => {
+  const [selectedIngredients, setSelectedIngredients] = useState([]);
   const [isSideWindowOpen, setIsSideWindowOpen] = useState(false);
+  const [isFilterWindowOpen, setIsFilterWindowOpen] = useState(false);
   const router = useRouter();
-  const {bagRecipes} = useContext(BagContext);
+  const { bagRecipes } = useContext(BagContext);
+  const {data:session} = useSession();
+
+  const handleIngredientChange = (selectedIngredients) => {
+    setSelectedIngredients(selectedIngredients);
+  };
+
+  const handleFilterSearch = () => {
+    const selectedIngredientValues = selectedIngredients.map((ingredient) => ingredient.value);
+    const ingredientQueryString = selectedIngredientValues.join(',');
+
+    router.push({
+      pathname: '/recipes',
+      query: { ...router.query, ingredients: ingredientQueryString, page: 1 },
+    });
+  };
 
   const toggleSideWindow = () => {
     setIsSideWindowOpen(!isSideWindowOpen);
+  };
+
+  const toggleFilterWindow = () => {
+    setIsFilterWindowOpen(!isFilterWindowOpen);
   };
 
   const mainContentStyle = {
@@ -133,10 +175,22 @@ const RecipesPage = ({ recipes, query, totalPages, currentPage }) => {
     <>
       <div style={mainContentStyle}>
         <Header />
-        <SearchBar initialValue={query} />
         <Center>
-          {query ? <Title></Title> : <Title>All recipes</Title>}
-          <RecipesGrid recipes={recipes} />
+        <SearchBar initialValue={query} />
+        <button onClick={toggleFilterWindow}>Filter</button>
+        {isFilterWindowOpen && (  // Render FilterWindow only when isFilterWindowOpen is true
+          <FilterWindow
+            selectedIngredients={selectedIngredients}
+            onIngredientChange={handleIngredientChange}
+            onSearch={handleFilterSearch}
+            isOpen={isFilterWindowOpen}
+          />
+        )}
+          <ContentContainer>
+            {query ? <Title></Title> : <Title>All recipes</Title>}
+            <RecipeCount>{`${totalRecipes} recipes`}</RecipeCount>
+          </ContentContainer>
+          <RecipesGrid recipes={recipes} session={session} />
           <StyledPagination
             current={currentPage}
             total={totalPages * 15}
@@ -198,28 +252,30 @@ export async function getServerSideProps({ query }) {
   const recipesPerPage = 15;
   const skip = (page - 1) * recipesPerPage;
 
-  const { query: searchQuery = '' } = query;
+  const { query: searchQuery = '', ingredients } = query;
 
   let recipes;
   let totalRecipes;
 
-  if (searchQuery) {
-    recipes = await Recipe.find({
+  if (searchQuery || ingredients) {
+    const searchFilters = {
       $or: [
         { title: { $regex: searchQuery, $options: 'i' } },
-        { description: { $regex: searchQuery, $options: 'i' } },
       ],
-    })
+    };
+
+    // Add ingredient filter if ingredients are provided
+    if (ingredients) {
+      const ingredientList = ingredients.split(',').map(ingredient => ingredient.trim());
+      searchFilters['ingredients.name'] = { $in: ingredientList };
+    }
+
+    recipes = await Recipe.find(searchFilters)
       .skip(skip)
       .limit(recipesPerPage)
       .exec();
-    
-    totalRecipes = await Recipe.countDocuments({
-      $or: [
-        { title: { $regex: searchQuery, $options: 'i' } },
-        { description: { $regex: searchQuery, $options: 'i' } },
-      ],
-    });
+
+    totalRecipes = await Recipe.countDocuments(searchFilters);
   } else {
     recipes = await Recipe.find({}, null, { sort: { _id: -1 } })
       .skip(skip)
@@ -237,6 +293,7 @@ export async function getServerSideProps({ query }) {
       query: searchQuery,
       totalPages,
       currentPage: page,
+      totalRecipes,
     },
   };
 }

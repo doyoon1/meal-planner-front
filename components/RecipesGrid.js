@@ -13,7 +13,7 @@ const StyledRecipesGrid = styled.div`
   }
 `;
 
-export default function RecipesGrid({ recipes }) {
+export default function RecipesGrid({ recipes, session }) {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
 
@@ -42,7 +42,7 @@ export default function RecipesGrid({ recipes }) {
             />
           ))}
       </StyledRecipesGrid>
-      <RecipeModal isOpen={modalIsOpen} closeModal={closeModal} recipe={selectedRecipe} />
+      <RecipeModal isOpen={modalIsOpen} closeModal={closeModal} recipe={selectedRecipe} session={session} />
     </div>
   );
 }

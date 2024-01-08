@@ -28,6 +28,7 @@ const BagTitle = styled.h2`
   font-size: 24px;
   font-weight: 700;
   text-align: center;
+  font-family: 'League Spartan', sans-serif;
 `;
 
 const TitleLabel = styled.h2`
@@ -130,7 +131,7 @@ const SideWindow = ({ isOpen }) => {
     const fetchRecipeDetails = async () => {
       const details = await Promise.all(
         bagRecipes.map(async (recipeId) => {
-          const response = await axios.post("/api/bag", { ids: [recipeId] });
+          const response = await axios.post("/api/bagRecipes", { ids: [recipeId] });
           return response.data[0];
         })
       );

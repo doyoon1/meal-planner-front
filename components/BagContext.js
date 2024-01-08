@@ -1,36 +1,107 @@
-// BagContext.js
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState } from 'react';
+import axios from 'axios';
+import { useSession } from 'next-auth/react';
+import toast from 'react-hot-toast';
 
 export const BagContext = createContext({});
 
 export function BagContextProvider({ children }) {
-  const ls = typeof window !== "undefined" ? window.localStorage : null;
+  const { data: session } = useSession();
   const [bagRecipes, setBagRecipes] = useState([]);
 
   useEffect(() => {
-    if (ls && ls.getItem("bag")) {
-      setBagRecipes(JSON.parse(ls.getItem("bag")));
+    // Fetch the initial bag data when the component mounts
+    if (session) {
+      axios.get(`/api/bag?userId=${session.user._id}`)
+        .then(response => {
+          setBagRecipes(response.data.bag);
+        })
+        .catch(error => {
+          console.error('Error fetching user bag:', error);
+        });
     }
-  }, [ls]);
+  }, [session]);
 
-  useEffect(() => {
-    if (bagRecipes?.length > 0) {
-      ls?.setItem("bag", JSON.stringify(bagRecipes));
-    } else {
-      ls?.removeItem("bag");
+  function manageRecipe(action, recipeId) {
+    if (!session) {
+      console.error('User not logged in.');
+      // Display a toast error message here
+      toast.error('Please log in to save recipes.', {
+        position: 'bottom-left', // Set the position to bottom-left
+      });
+      return;
     }
-  }, [bagRecipes, ls]);
+  
+    const userId = session.user._id;
+  
+    axios.post('/api/bag', { userId, recipeId, action }, { withCredentials: true })
+      .then(response => {
+        // Handle success if needed
+        // Fetch the updated bag data after successful update
+        axios.get(`/api/bag?userId=${userId}`)
+          .then(response => {
+            setBagRecipes(response.data.bag);
+            // Display a toast success message here
+            toast.success('Saved successfully!', {
+              position: 'bottom-left', // Set the position to bottom-left
+            });
+          })
+          .catch(error => {
+            console.error('Error fetching updated bag data:', error);
+          });
+      })
+      .catch(error => {
+        // Handle error if needed
+        console.error('Error managing recipe in bag:', error);
+        // Display a toast error message here if saving fails
+        toast.error('Failed to save recipe.', {
+          position: 'bottom-left', // Set the position to bottom-left
+        });
+      });
+  }
 
   function addRecipe(recipeId) {
-    if (!bagRecipes.includes(recipeId)) {
-      setBagRecipes((prev) => [...prev, recipeId]);
-    }
+    manageRecipe('add', recipeId);
   }
 
   function removeRecipe(recipeId) {
-    setBagRecipes((prev) => prev.filter((id) => id !== recipeId));
+    if (!session) {
+      console.error('User not logged in.');
+      // Display a toast error message here
+      toast.error('Please log in to save recipes.', {
+        position: 'bottom-left', // Set the position to bottom-left
+      });
+      return;
+    }
+  
+    const userId = session.user._id;
+  
+    axios.post('/api/bag', { userId, recipeId, action: 'remove' }, { withCredentials: true })
+      .then(response => {
+        // Handle success if needed
+        // Fetch the updated bag data after successful update
+        axios.get(`/api/bag?userId=${userId}`)
+          .then(response => {
+            setBagRecipes(response.data.bag);
+            // Display a toast success message here
+            toast.success('Recipe removed successfully!', {
+              position: 'bottom-left', // Set the position to bottom-left
+            });
+          })
+          .catch(error => {
+            console.error('Error fetching updated bag data:', error);
+          });
+      })
+      .catch(error => {
+        // Handle error if needed
+        console.error('Error removing recipe from bag:', error);
+        // Display a toast error message here if removal fails
+        toast.error('Failed to remove recipe.', {
+          position: 'bottom-left', // Set the position to bottom-left
+        });
+      });
   }
-
+  
   return (
     <BagContext.Provider value={{ bagRecipes, setBagRecipes, addRecipe, removeRecipe }}>
       {children}

@@ -2,9 +2,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import styled from "styled-components";
 import Center from "./Center";
-import { useContext, useState, useEffect } from "react";
-import { BagContext } from "./BagContext";
-import BagIcon from "./icons/BagIcon";
+import { useState, useEffect } from "react";
 import HamburgerIcon from "./icons/Hamburger";
 import axios from "axios";
 import CoursesDropdown from "./Dropdown";
@@ -19,12 +17,21 @@ const Logo = styled(Link)`
     text-decoration: none;
     position: relative;
     z-index: 3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    img{
+      height: 64px;
+      width: 64px;
+    }
 `;
 
 const Wrapper = styled.div`
     display: flex;
     justify-content: space-between;
     padding: 20px 0;
+    align-items: center;
 `;
 
 const StyledNav = styled.nav`
@@ -42,9 +49,9 @@ const StyledNav = styled.nav`
     padding: 70px 20px 20px;
     background-color: #111;
     @media screen and (min-width: 768px) {
-        display: flex;
-        position: static;
-        padding: 0;
+      display: flex;
+      position: static;
+      padding: 0;
     }
 `;
 
@@ -53,8 +60,8 @@ const NavLink = styled(Link)`
     color: #aaa;
     text-decoration: none;
     &:hover {
-        color: #fff;
-        transition: all .4s;
+      color: #fff;
+      transition: all .4s;
     }
     ${(props) => props.isActive && `color: #fff;`}
     padding: 5px 0;
@@ -105,6 +112,7 @@ const Logout = styled.button`
 
 export default function Header() {
     const router = useRouter();
+    const [mainCourses, setMainCourses] = useState([])
     const [coursesCategories, setCoursesCategories] = useState([]);
     const [dietaryCategories, setDietaryCategories] = useState([]);
     const [mobileNavActive, setMobileNavActive] = useState(false);
@@ -149,15 +157,37 @@ export default function Header() {
 
         fetchCategories();
     }, []);
-  
+
+    useEffect(() => {
+      const mainCourses = async () => {
+      try {
+          const response = await axios.get("/api/categories");
+          const mainCoursesCategoryId = "6581153849e5aa1bbc820d9b";
+          
+          // Filter categories with "coursesCategoryId" as their parent
+          const filteredMainCategories = response.data.filter((category) => {
+          return category.parent === mainCoursesCategoryId;
+          });
+
+          setMainCourses(filteredMainCategories);
+      } catch (error) {
+          console.error('Error fetching categories:', error);
+      }
+      };
+
+      mainCourses();
+  }, []);
+
     return (
       <div>
         <StyledHeader mobileNavActive={mobileNavActive}>
           <Center>
             <Wrapper>
-              <Logo href={"/"}>MealGrub</Logo>
+              <Logo href={"/"}>
+                MealGrub
+              </Logo>
               <StyledNav>
-                <NavLink href={"/"} isActive={router.pathname === "/"}>
+                <NavLink href={"/home"} isActive={router.pathname === "/home"}>
                   Home
                 </NavLink>
                 <NavLink
@@ -167,17 +197,12 @@ export default function Header() {
                   Recipes
                 </NavLink>
                 <NavLink
-                  href={"/categories"}
-                  isActive={router.pathname === "/categories"}
-                >
-                  Categories
-                </NavLink>
-                <NavLink
                   href={"/planner"}
                   isActive={router.pathname === "/planner"}
                 >
                   Planner
                 </NavLink>
+                <CoursesDropdown categories={mainCourses} label="Main Courses" />
                 <CoursesDropdown categories={coursesCategories} label="Courses" />
                 <CoursesDropdown categories={dietaryCategories} label="By Diet" />
                 <ButtonsWrapper>
@@ -192,11 +217,11 @@ export default function Header() {
                   )}
                   {status === 'unauthenticated' && (
                     <>
-                      <NavLink href={"/register"} isActive={router.pathname === "/register"}>
-                        Sign up
-                      </NavLink>
                       <NavLink href={"/login"} isActive={router.pathname === "/login"}>
-                        Sign in
+                        Login
+                      </NavLink>
+                      <NavLink href={"/register"} isActive={router.pathname === "/register"}>
+                        Register
                       </NavLink>
                     </>
                   )}
