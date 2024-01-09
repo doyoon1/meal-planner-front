@@ -5,18 +5,15 @@ import mongoose from "mongoose";
 import { Recipe } from "@/models/Recipe";
 import CategorySchema from "@/models/Category";
 import styled from "styled-components";
-import RecipeImages from "@/components/RecipeImages";
-import Button from "@/components/Button";
-import PrintIcon from "@/components/icons/PrintIcon";
 import { BagContext } from "@/components/BagContext";
 import { Link as ScrollLink, animateScroll as scroll } from 'react-scroll';
 import Footer from "@/components/Footer";
 import { useContext, useState } from "react";
+import { useRouter } from "next/router";
 import Link from "next/link";
 import YouTube from 'react-youtube';
 import jsPDF from "jspdf";
 import ScrollToTopButton from "@/components/ScrollToTop";
-import copy from "copy-to-clipboard";
 import Fraction from 'fraction.js';
 import { format } from 'date-fns';
 import StarRatings from "react-star-ratings";
@@ -468,8 +465,6 @@ export default function RecipePage({ recipe }) {
     const originalServings = recipe.servings;
     const originalIngredients = recipe.ingredients;
     const [servingsChanged, setServingsChanged] = useState(false);
-    const [buttonText, setButtonText] = useState('Copy');
-    const [copyIcon, setCopyIcon] = useState(true);
     const [activeImageIndex, setActiveImageIndex] = useState(0);
     const formattedCreatedAt = format(new Date(recipe.createdAt), 'MMMM dd, yyyy');
     const formattedUpdatedAt = format(new Date(recipe.updatedAt), 'MMMM dd, yyyy');
@@ -477,6 +472,56 @@ export default function RecipePage({ recipe }) {
     const [totalRatings, setTotalRatings] = useState(0);
     const [userRating, setUserRating] = useState(averageRating);
     const { data: session } = useSession();
+    const [comments, setComments] = useState([]);
+    const [newCommentText, setNewCommentText] = useState('');
+    const router = useRouter();
+
+    useEffect(() => {
+        const fetchComments = async () => {
+            try {
+                const response = await axios.get(`/api/comment?recipeId=${recipe._id}`);
+                setComments(response.data.comments);
+            } catch (error) {
+                console.error('Error fetching comments:', error);
+            }
+        };
+
+        fetchComments();
+    }, [recipe._id]);
+
+    const handleAddComment = async () => {
+        const userId = session.user._id;
+        const recipeId = recipe._id;
+    
+        if (newCommentText.trim() !== '') {
+          try {
+            const response = await fetch('/api/comment', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                recipeId,
+                userId,
+                text: newCommentText,
+              }),
+            });
+    
+            if (response.ok) {
+              const data = await response.json();
+              setComments([...comments, data.comment]); // Update the local state with the new comment
+              setNewCommentText('');
+    
+              // Reload the page after successful comment submission
+              router.reload();
+            } else {
+              console.error('Failed to add comment:', response.statusText);
+            }
+          } catch (error) {
+            console.error('Error adding comment:', error);
+          }
+        }
+    };
 
     useEffect(() => {
       // Fetch the average and total ratings when the component mounts
@@ -604,22 +649,6 @@ export default function RecipePage({ recipe }) {
         const pdfFileName = `MealGrub-${recipe.title}_Ingredients_${new Date().getTime()}.pdf`;
         doc.save(pdfFileName);
     };      
-
-    const copyIngredientsToClipboard = () => {
-        const ingredientsText = updatedIngredients
-          .map((ingredient) => `${ingredient.quantity} ${ingredient.measurement} - ${ingredient.name}`)
-          .join('\n');
-    
-        if (ingredientsText) {
-          copy(ingredientsText);
-          setButtonText('Copied');
-          setCopyIcon(false); // Change the icon
-          setTimeout(() => {
-            setButtonText('Copy');
-            setCopyIcon(true); // Reset the icon
-          }, 2000);
-        }
-    }
       
     const increaseSets = () => {
         setSets(sets + 1);
@@ -637,7 +666,6 @@ export default function RecipePage({ recipe }) {
         }
     };
 
-    // Calculate the ratio of servings change
     const servingsRatio = servings / originalServings;
     const updatedIngredients = originalIngredients.map((ingredient, index) => {    
         return {
@@ -755,10 +783,22 @@ export default function RecipePage({ recipe }) {
                                 <p>Submit your question or comment below.</p>
                                 <CommentContainer>
                                     <p>Comment*</p>
-                                    <textarea/>
+                                    <textarea
+                                    value={newCommentText}
+                                    onChange={e => setNewCommentText(e.target.value)}
+                                    placeholder="Add your comment..."
+                                    />
                                 </CommentContainer>
-                                <button>Submit Comment</button>
+                                <button onClick={handleAddComment}>Submit Comment</button>
                             </Feedback>
+                            <CommentContainer>
+                                <h2>Comments</h2>
+                                {comments.map((comment) => (
+                                    <div key={comment._id}>
+                                        <p>{comment.user.firstName} {comment.user.lastName}: {comment.text}</p>
+                                    </div>
+                                ))}
+                            </CommentContainer>
                         </LeftColumn>
                         <RightColumn>
                             <IngredientsContainer>

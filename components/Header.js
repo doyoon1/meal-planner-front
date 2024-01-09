@@ -210,7 +210,11 @@ export default function Header() {
                     <>
                       <NavLink href={'/profile'}>Profile</NavLink>
                       <Logout
-                        onClick={() => signOut()}>
+                        onClick={async () => {
+                          await signOut({ redirect: false });
+                          router.push("/login");
+                        }}
+                      >
                         Logout
                       </Logout>
                     </>

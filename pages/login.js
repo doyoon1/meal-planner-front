@@ -141,11 +141,15 @@ export default function LoginPage() {
 
   async function handleFormSubmit(ev) {
     ev.preventDefault();
-		setLoginInProgress(true);
-
-		await signIn('credentials', {email, password, callbackUrl: '/home'});
-
-		setLoginInProgress(false);
+    setLoginInProgress(true);
+  
+    await signIn('credentials', {
+      email,
+      password,
+      callbackUrl: `${window.location.origin}/home`,
+    });
+  
+    setLoginInProgress(false);
   }
 
   return (
