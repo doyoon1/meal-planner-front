@@ -61,7 +61,6 @@ export default function PlannerPage() {
         <Title>My Planner</Title>
         {recipes.length > 0 ? (
           <div>
-            <h3>Recipes in the Bag:</h3>
             <RecipeContainer ref={drop}>
                 {bagRecipes.map(recipeId => {
                 const recipe = recipes.find(r => r._id === recipeId);

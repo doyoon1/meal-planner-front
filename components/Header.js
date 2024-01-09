@@ -70,6 +70,21 @@ const NavLink = styled(Link)`
     }
 `;
 
+const NavName = styled.p`
+    display: block;
+    color: #aaa;
+    text-decoration: none;
+    &:hover {
+      color: #fff;
+      transition: all .4s;
+      cursor: default;
+    }
+    margin: 0;
+    @media screen and (min-width: 768px) {
+        margin: 0;
+    }
+`;
+
 const NavButton = styled.button`
     background-color: transparent;
     width: 40px;
@@ -208,7 +223,7 @@ export default function Header() {
                 <ButtonsWrapper>
                   {status === 'authenticated' && (
                     <>
-                      <NavLink href={'/profile'}>Profile</NavLink>
+                      <NavName>Hello, {session.data.user.firstName}!</NavName>
                       <Logout
                         onClick={async () => {
                           await signOut({ redirect: false });

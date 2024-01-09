@@ -19,6 +19,7 @@ import { format } from 'date-fns';
 import StarRatings from "react-star-ratings";
 import { useEffect } from "react";
 import axios from "axios";
+import { toast } from 'react-hot-toast';
 import { useSession } from "next-auth/react";
 import "@/components/fonts/Poppins-Light-normal"
 import "@/components/fonts/Poppins-Medium-normal"
@@ -122,6 +123,42 @@ const Feedback = styled.div`
         font-size: 16px;
         cursor: pointer;
     }
+`;
+
+const CommentBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    h2 {
+      font-family: 'League Spartan', sans-serif;
+      margin-bottom: 0;
+    }
+    p {
+        font-size: 16px;
+        margin-bottom: 0;
+    }
+`;
+
+const Comment = styled.div`
+    display: flex;
+    flex-direction: column;
+    border-bottom: 4px solid #ddd;
+    span {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+`;
+
+const FullName = styled.h4`
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 0;
+  font-family: 'League Spartan', sans-serif;
+`;
+
+const PostedDate = styled.h1`
+  font-weight: 500;
+  margin-bottom: 6px;
+  font-size: 12px;
 `;
 
 const CommentContainer = styled.div`
@@ -466,7 +503,7 @@ export default function RecipePage({ recipe }) {
     const originalIngredients = recipe.ingredients;
     const [servingsChanged, setServingsChanged] = useState(false);
     const [activeImageIndex, setActiveImageIndex] = useState(0);
-    const formattedCreatedAt = format(new Date(recipe.createdAt), 'MMMM dd, yyyy');
+    const formattedCreatedAt = format(new Date(recipe.createdAt), 'MMMM dd, yyyy HH:mm:ss');
     const formattedUpdatedAt = format(new Date(recipe.updatedAt), 'MMMM dd, yyyy');
     const [averageRating, setAverageRating] = useState(0);
     const [totalRatings, setTotalRatings] = useState(0);
@@ -474,7 +511,8 @@ export default function RecipePage({ recipe }) {
     const { data: session } = useSession();
     const [comments, setComments] = useState([]);
     const [newCommentText, setNewCommentText] = useState('');
-    const router = useRouter();
+
+
 
     useEffect(() => {
         const fetchComments = async () => {
@@ -492,7 +530,7 @@ export default function RecipePage({ recipe }) {
     const handleAddComment = async () => {
         const userId = session.user._id;
         const recipeId = recipe._id;
-    
+      
         if (newCommentText.trim() !== '') {
           try {
             const response = await fetch('/api/comment', {
@@ -504,25 +542,31 @@ export default function RecipePage({ recipe }) {
                 recipeId,
                 userId,
                 text: newCommentText,
+                approved: false,
               }),
             });
-    
+      
             if (response.ok) {
               const data = await response.json();
-              setComments([...comments, data.comment]); // Update the local state with the new comment
+              setComments([...comments, data.comment]);
               setNewCommentText('');
-    
-              // Reload the page after successful comment submission
-              router.reload();
+      
+              // Display a success toast with bottom-left position
+              toast.success("Thank you for submitting your comment. Wait for admin's approval.", {
+                position: 'bottom-left',
+              });
+      
             } else {
               console.error('Failed to add comment:', response.statusText);
+              // You may handle the error and display an error toast here
             }
           } catch (error) {
             console.error('Error adding comment:', error);
+            // You may handle the error and display an error toast here
           }
         }
     };
-
+    
     useEffect(() => {
       // Fetch the average and total ratings when the component mounts
       axios
@@ -791,14 +835,18 @@ export default function RecipePage({ recipe }) {
                                 </CommentContainer>
                                 <button onClick={handleAddComment}>Submit Comment</button>
                             </Feedback>
-                            <CommentContainer>
+                            <CommentBox>
                                 <h2>Comments</h2>
-                                {comments.map((comment) => (
-                                    <div key={comment._id}>
-                                        <p>{comment.user.firstName} {comment.user.lastName}: {comment.text}</p>
-                                    </div>
-                                ))}
-                            </CommentContainer>
+                                {comments
+                                    .filter(comment => comment.approved)
+                                    .map((comment) => (
+                                        <Comment key={comment._id}>
+                                            <FullName>{comment.user.firstName} {comment.user.lastName}</FullName>
+                                            <PostedDate>Posted on {format(new Date(comment.createdAt), 'MMMM dd, yyyy')}</PostedDate>
+                                            <span>{comment.text}</span>
+                                        </Comment>
+                                    ))}
+                            </CommentBox>
                         </LeftColumn>
                         <RightColumn>
                             <IngredientsContainer>
