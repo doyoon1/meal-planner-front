@@ -143,14 +143,14 @@ export default function LoginPage() {
     ev.preventDefault();
     setLoginInProgress(true);
   
-    await signIn('credentials', {
-      email,
-      password,
-      callbackUrl: `${window.location.origin}/home`,
-    });
+    // Get the current host from window.location
+    const currentHost = window.location.origin;
+  
+    await signIn('credentials', { email, password, callbackUrl: `${currentHost}/home` });
   
     setLoginInProgress(false);
   }
+  
 
   return (
     <>
