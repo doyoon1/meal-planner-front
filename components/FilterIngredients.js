@@ -3,6 +3,10 @@ import Select from 'react-select';
 import styled from 'styled-components';
 import Center from './Center';
 
+const FilterWindowContainer = styled.div`
+  margin-top: 10px;
+`;
+
 const Label = styled.p`
   font-size: 16px;
   margin-bottom: 0px;
@@ -45,15 +49,17 @@ export default function FilterWindow({ ingredients, selectedIngredients, onIngre
 
   return (
     <>
-      <h1>Filter Window</h1>
-      <Label>Ingredients</Label>
-      <Select
-        isMulti
-        options={options}
-        value={selectedIngredients}
-        onChange={onIngredientChange}
-      />
-      <SearchButton onClick={onSearch}>Search</SearchButton>
+      <FilterWindowContainer>
+        <h1>Filter Window</h1>
+        <Label>Ingredients</Label>
+        <Select
+          isMulti
+          options={options}
+          value={selectedIngredients}
+          onChange={onIngredientChange}
+        />
+        <SearchButton onClick={onSearch}>Search</SearchButton>
+      </FilterWindowContainer>
     </>
   );
 }
