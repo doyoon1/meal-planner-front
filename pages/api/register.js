@@ -26,12 +26,20 @@ export default async function handler(req, res) {
       if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(password)) {
         return res.status(400).json({
           error:
-            'Password must be at least 5 characters and contain at least one uppercase letter, one lowercase letter, one number, and one special character.',
+            'Password must be 5 characters with at least one uppercase, one lowercase, one number, and one special character.',
         });
       }
 
       if (!/^[a-zA-Z]+$/.test(firstName) || !/^[a-zA-Z]+$/.test(lastName)) {
         return res.status(400).json({ error: 'Name should not contain numbers or special characters' });
+      }
+
+      // Check if the email already exists
+      const existingUser = await UserAccounts.findOne({ email });
+
+      if (existingUser) {
+        // Email is already registered
+        return res.status(400).json({ error: 'Email is already registered' });
       }
 
       // Hash the password

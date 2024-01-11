@@ -4,6 +4,7 @@ import styled from "styled-components";
 import Center from "./Center";
 import { useState, useEffect } from "react";
 import HamburgerIcon from "./icons/Hamburger";
+import CloseIcon from "./icons/CloseIcon";
 import axios from "axios";
 import CoursesDropdown from "./Dropdown";
 import { signOut, useSession } from "next-auth/react";
@@ -40,14 +41,16 @@ const StyledNav = styled.nav`
     ` : `
         display: none;
     `}
-    gap: 10px;
+    align-items: center;
+    gap: 8px;
     position: fixed;
-    top: 0;
+    top: 50px;
     bottom: 0;
     left: 0;
     right: 0;
-    padding: 70px 20px 20px;
+    padding: 20px 20px 20px;
     background-color: #111;
+    z-index: 1000;
     @media screen and (min-width: 768px) {
       display: flex;
       position: static;
@@ -56,6 +59,7 @@ const StyledNav = styled.nav`
 `;
 
 const NavLink = styled(Link)`
+    background-color: #transparent;
     display: block;
     color: #aaa;
     text-decoration: none;
@@ -85,35 +89,64 @@ const NavName = styled.p`
     }
 `;
 
-const NavButton = styled.button`
-    background-color: transparent;
-    width: 40px;
-    height: 30px;
-    border: 0;
-    cursor: pointer;
-    color: white;
-    position: relative;
-    z-index: 3;
+const DropdownWrapper = styled.div`
+    background-color: #transparent;
+    display: flex;
+    gap: 8px;
+    flex-direction: column;
+
     @media screen and (min-width: 768px) {
-        display: none;
+      padding: 0;
+      flex-direction: row;
     }
 `;
 
-const ButtonsWrapper = styled.div`
-    display: flex;
-    gap: 10px;
+const NavButton = styled.button`
+  background-color: transparent;
+  width: 40px;
+  height: 30px;
+  border: 0;
+  cursor: pointer;
+  color: white;
+  position: relative;
+  z-index: 3;
+  @media screen and (min-width: 768px) {
+    display: none;
+  }
+
+  svg {
+    transition: transform 0.3s ease;
+  }
+
+  &:hover {
+    svg {
+    }
+  }
 `;
 
-const Logout = styled.button`
-  display: block;
+
+const ButtonsWrapper = styled.div`
+    display: flex;
+    gap: 8px;
+    background-color: #transparent;
+    flex-direction: column;
+    margin-top: 8px;
+
+    @media screen and (min-width: 768px) {
+      flex-direction: row;
+      margin-top: 0;
+    }
+`;
+
+const Logout = styled.div`
   color: #aaa;
   text-decoration: none;
-  background-color: transparent;
+  background-color: #transparent;
   border: none;
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
   font-size: 16px;
-  padding: 5px 0;
+  padding: 0;
   
   &:hover {
     color: #fff;
@@ -125,6 +158,7 @@ const Logout = styled.button`
   }
 `;
 
+
 export default function Header() {
     const router = useRouter();
     const [mainCourses, setMainCourses] = useState([])
@@ -133,6 +167,8 @@ export default function Header() {
     const [mobileNavActive, setMobileNavActive] = useState(false);
     const session = useSession();
     const status = session.status;
+
+
 
     useEffect(() => {
     const fetchDietaryCategories = async () => {
@@ -195,13 +231,13 @@ export default function Header() {
 
     return (
       <div>
-        <StyledHeader mobileNavActive={mobileNavActive}>
+        <StyledHeader>
           <Center>
             <Wrapper>
               <Logo href={"/"}>
                 MealGrub
               </Logo>
-              <StyledNav>
+              <StyledNav mobileNavActive={mobileNavActive}>
                 <NavLink href={"/home"} isActive={router.pathname === "/home"}>
                   Home
                 </NavLink>
@@ -217,9 +253,11 @@ export default function Header() {
                 >
                   Planner
                 </NavLink>
-                <CoursesDropdown categories={mainCourses} label="Main Courses" />
-                <CoursesDropdown categories={coursesCategories} label="Courses" />
-                <CoursesDropdown categories={dietaryCategories} label="By Diet" />
+                <DropdownWrapper>
+                  <CoursesDropdown categories={mainCourses} label="Main Courses" />
+                  <CoursesDropdown categories={coursesCategories} label="Courses" />
+                  <CoursesDropdown categories={dietaryCategories} label="Dietary" />
+                </DropdownWrapper>
                 <ButtonsWrapper>
                   {status === 'authenticated' && (
                     <>
@@ -247,7 +285,7 @@ export default function Header() {
                 </ButtonsWrapper>
               </StyledNav>
               <NavButton onClick={() => setMobileNavActive((prev) => !prev)}>
-                <HamburgerIcon />
+                {mobileNavActive ? <CloseIcon /> : <HamburgerIcon />}
               </NavButton>
             </Wrapper>
           </Center>

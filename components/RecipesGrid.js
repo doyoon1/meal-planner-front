@@ -5,9 +5,14 @@ import RecipeModal from "./RecipeDetails";
 
 const StyledRecipesGrid = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
-  margin-bottom: 30px;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-bottom: 20px;
+
+  @media screen and (min-width: 480px) {
+    grid-template-columns: 1fr 1fr;
+  }
+
   @media screen and (min-width: 768px) {
     grid-template-columns: 1fr 1fr 1fr;
   }

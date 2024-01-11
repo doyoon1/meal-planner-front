@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 import { useState } from 'react';
 import NavBar from '@/components/Navbar';
+import toast from 'react-hot-toast';
 
 const StyledComponent = styled.div`
   background-image: url('/loginbg.png');
@@ -40,7 +41,7 @@ const Signin = styled(Link)`
 
 const FormContainer = styled.form`
   display: flex;
-  padding: 10px 40px 40px 40px;
+  padding: 10px 40px 80px 40px;
   width: 340px;
   flex-direction: column;
   background-color: #fff;
@@ -142,13 +143,26 @@ export default function LoginPage() {
   async function handleFormSubmit(ev) {
     ev.preventDefault();
     setLoginInProgress(true);
-  
+
+    // Validation check: Ensure email and password are not empty
+    if (!email || !password) {
+      toast.error('All fields are required', { position: 'bottom-left' });
+      setLoginInProgress(false);
+      return;
+    }
+
     const currentHost = window.location.origin;
-  
-    await signIn('credentials', { email, password, callbackUrl: `${currentHost}/home` });
-  
+
+    const result = await signIn('credentials', { email, password, callbackUrl: `${currentHost}/home`, redirect: false });
+
+    if (result.error) {
+      // Display an error toast
+      toast.error('Email or password is incorrect', { position: 'bottom-left' });
+    }
+
     setLoginInProgress(false);
   }
+
   
 
   return (
@@ -177,13 +191,6 @@ export default function LoginPage() {
 							disabled={loginInProgress}
               onChange={ev => setPassword(ev.target.value)} />
             <SubmitButton type='submit' disabled={loginInProgress}>Login</SubmitButton>
-
-            <OrText>OR</OrText>
-
-            <FacebookButton>
-              <Image src={'/facebook.png'} alt={''} width={24} height={24} />
-              Continue with Facebook
-            </FacebookButton>
           </FormContainer>
         </Center>
       </StyledComponent>

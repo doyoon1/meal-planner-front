@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
 import styled from 'styled-components';
-import Center from './Center';
 
 const FilterWindowContainer = styled.div`
   margin-top: 10px;
@@ -25,19 +24,36 @@ const SearchButton = styled.button`
   cursor: pointer;
 `;
 
-export default function FilterWindow({ ingredients, selectedIngredients, onIngredientChange, onSearch }) {
-  // Remove the state declaration for ingredients
-  const [options, setOptions] = useState(ingredients);
 
+export default function FilterWindow({ ingredients, selectedIngredients, onIngredientChange, onSearch }) {
+  const [options, setOptions] = useState([]);
 
   useEffect(() => {
-    // Fetch ingredients from API only if not already provided as a prop
     if (!ingredients || ingredients.length === 0) {
       const fetchIngredients = async () => {
         try {
           const response = await fetch('/api/ingredients');
           const data = await response.json();
-          setOptions(data.ingredients.map((ingredient) => ({ value: ingredient, label: ingredient })));
+
+          // Use a Set to filter out duplicate ingredients, ignoring case
+          const uniqueIngredientsSet = new Set();
+          const uniqueIngredientsMap = new Map();
+
+          data.ingredients.forEach((ingredient) => {
+            const trimmedLowercaseIngredient = ingredient.trim().toLowerCase();
+
+            if (!uniqueIngredientsSet.has(trimmedLowercaseIngredient)) {
+              uniqueIngredientsSet.add(trimmedLowercaseIngredient);
+              uniqueIngredientsMap.set(trimmedLowercaseIngredient, ingredient);
+            }
+          });
+
+          // Convert the unique ingredients back to their original cases
+          const sortedUniqueIngredients = Array.from(uniqueIngredientsSet)
+            .sort((a, b) => a.localeCompare(b))
+            .map((trimmedLowercaseIngredient) => ({ value: trimmedLowercaseIngredient, label: uniqueIngredientsMap.get(trimmedLowercaseIngredient) }));
+
+          setOptions(sortedUniqueIngredients);
         } catch (error) {
           console.error('Error fetching ingredients:', error);
         }

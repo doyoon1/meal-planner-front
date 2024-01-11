@@ -22,10 +22,29 @@ const RecipeContainer = styled.div`
   user-select: none;
 `;
 
+const MessageContainer = styled.div`
+  font-size: 18px;
+  text-align: center;
+  margin-top: 20px;
+`;
+
 export default function PlannerPage() {
   const { bagRecipes } = useContext(BagContext);
   const [recipes, setRecipes] = useState([]);
   const { data:session } = useSession();
+  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setScreenWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     if (bagRecipes.length === 0) {
@@ -58,23 +77,31 @@ export default function PlannerPage() {
     <>
       <Header />
       <Center>
-        <Title>My Planner</Title>
-        {recipes.length > 0 ? (
-          <div>
-            <RecipeContainer ref={drop}>
-                {bagRecipes.map(recipeId => {
-                const recipe = recipes.find(r => r._id === recipeId);
-                return recipe ? (
-                    <DraggableRecipe key={recipe._id} recipe={recipe} session={session} />
-                ) : null;
-                })}
-            </RecipeContainer>
-          </div>
+        {screenWidth >= 960 ? (
+          <>
+            <Title>My Planner</Title>
+            {recipes.length > 0 ? (
+              <div>
+                <RecipeContainer ref={drop}>
+                  {bagRecipes.map(recipeId => {
+                    const recipe = recipes.find(r => r._id === recipeId);
+                    return recipe ? (
+                      <DraggableRecipe key={recipe._id} recipe={recipe} session={session} />
+                    ) : null;
+                  })}
+                </RecipeContainer>
+                <WeekCalendar />
+              </div>
+            ) : (
+              <div>Your bag is empty.</div>
+            )}
+          </>
         ) : (
-          <div>Your bag is empty.</div>
+          <MessageContainer>
+            Planner is only available for desktop.
+          </MessageContainer>
         )}
-        <WeekCalendar />
-        </Center>
+      </Center>
     </>
   );
 }

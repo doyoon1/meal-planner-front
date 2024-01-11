@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import NavBar from '@/components/Navbar';
+import toast from 'react-hot-toast';
 
 const StyledComponent = styled.div`
   background-image: url('/background.png');
@@ -173,26 +174,48 @@ export default function RegisterPage() {
   async function handleFormSubmit(ev) {
     ev.preventDefault();
     setCreatingUser(true);
-    setError(false);
-    setUserCreated(false);
-    const response = await fetch('/api/register', {
-      method: 'POST',
-      body: JSON.stringify({
-        firstName,
-        lastName,
-        email,
-        password,
-        confirmPassword,
-      }),
-      headers: {'Content-Type': 'application/json'},
-    });
-    if (response.ok) {
-      setUserCreated(true);
-    } else {
+  
+    try {
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email,
+          password,
+          confirmPassword,
+        }),
+        headers: { 'Content-Type': 'application/json' },
+      });
+  
+      if (response.ok) {
+        toast.success('Account has been successfully created!', { position: 'bottom-left' });
+        setUserCreated(true);
+  
+        // Clear the form fields
+        setFirstName('');
+        setLastName('');
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+  
+        // Introduce a delay before redirecting to the login page
+        setTimeout(() => {
+          // Redirect to the login page
+          window.location.href = '/login';
+        }, 1000); // Adjust the delay as needed
+      } else {
+        const data = await response.json();
+        toast.error(data.error || 'An error has occurred. Please try again later', { position: 'bottom-left' });
+        setError(true);
+      }
+    } catch (error) {
+      toast.error('An error has occurred. Please try again later', { position: 'bottom-left' });
       setError(true);
+    } finally {
+      setCreatingUser(false);
     }
-    setCreatingUser(false);
-  }
+  }  
 
   return (
     <>
@@ -237,24 +260,9 @@ export default function RegisterPage() {
               value={confirmPassword}
               disabled={creatingUser}
               onChange={ev => setConfirmPassword(ev.target.value)} />
-            <SubmitButton type='submit' disabled={creatingUser}>Create account</SubmitButton>
-
-            <OrText>OR</OrText>
-
-            <FacebookButton>
-              <Image src={'/facebook.png'} alt={''} width={24} height={24} />
-              Continue with Facebook
-            </FacebookButton>
-            {userCreated && (
-              <SuccessMessage>
-                Account has been successfully created!
-              </SuccessMessage>
-            )}
-            {error && (
-              <ErrorMessage>
-                An error has occured. Please try again later
-              </ErrorMessage>
-            )}
+            <SubmitButton type='submit' disabled={creatingUser}>
+              Create account
+            </SubmitButton>
           </FormContainer>
         </Center>
       </StyledComponent>

@@ -8,6 +8,7 @@ import bcrypt from "bcrypt";
 
 export const authOptions = {
   secret: process.env.SECRET,
+  site: process.env.NEXTAUTH_URL || "http://localhost:3000",
   providers: [
     CredentialsProvider({
       name: "Credentials",
