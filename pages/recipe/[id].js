@@ -21,6 +21,7 @@ import { useEffect } from "react";
 import axios from "axios";
 import { toast } from 'react-hot-toast';
 import { useSession } from "next-auth/react";
+import SideWindow from "@/components/SideWindow";
 import "@/components/fonts/Poppins-Light-normal"
 import "@/components/fonts/Poppins-Medium-normal"
 import "@/components/fonts/OpenSans_Condensed-Regular-normal"
@@ -32,11 +33,58 @@ const PageWrapper = styled.div`
     background-color: #eee;
 `;
 
+const IconButtons = styled.div`
+  width: 40px;
+  height: 40px;
+  position: fixed;
+  top: ${(props) => (props.isSideWindowOpen ? "300px" : "300px")};
+  right: ${(props) => (props.isSideWindowOpen ? "405px" : "55px")};
+  z-index: 999;
+  background-color: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: top 0.5s, right 0.5s;
+  @media screen and (max-width: 768px) {
+    top: ${(props) => (props.isSideWindowOpen ? "300px" : "500px")};
+    right: ${(props) => (props.isSideWindowOpen ? "405px" : "15px")};
+  }
+`;
+
+const BagLength = styled.span`
+  font-size: 10px;
+  position: absolute;
+  height: 8px;
+  width: 8px;
+  top: -5px;
+  right: -5px;
+  background-color: #FF0126;
+  color: #fff;
+  padding: 5px;
+  border-radius: 50%;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const Icon = styled.svg`
+  width: 16px;
+  height: 16px;
+`;
+
 const Title = styled.h1`
     font-size: 3em;
     font-weight: bold;
     margin: 18px 0;
     font-family: 'League Spartan', sans-serif;
+    @media screen and (max-width: 768px) {
+        font-size: 2em;
+        margin: 12px 0;
+    }
 `;
 
 const Description = styled.p`
@@ -45,16 +93,17 @@ const Description = styled.p`
     text-align: justify;
     margin: 12px 0;
     font-family: 'League Spartan', sans-serif;
-`;
-
-const ButtonWrapper = styled.div`
-    display: flex;
-    gap: 4px;
+    @media screen and (max-width: 768px) {
+        font-size: 0.8em;
+    }
 `;
 
 const Message = styled.p`
     color: #ff3333;
     font-size: 12px;
+    @media screen and (max-width: 768px) {
+        font-size: 8px;
+    }
 `;
 
 const CategoryWrapper = styled.div`
@@ -77,22 +126,27 @@ const VideoContainer = styled.div`
     gap: 20px;
     text-align: center;
     margin-top: 20px;
+
     &:before {
         content: '';
         display: block;
-        height: 80px; // Adjust the height as needed
-        margin-top: -80px; // Make sure to adjust this to match the height
+        height: 80px;
+        margin-top: -80px;
         visibility: hidden;
+    }
+
+    @media screen and (max-width: 768px) {
+        iframe {
+            height: 200px !important;
+        }
     }
 `;
 
-const RatingContainer = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    p {
-        font-size: 16px;
-        font-weight: bold;
+const FeedbackContainer = styled.div`
+    margin-bottom: 100px;
+    @media screen and (max-width: 768px) {
+        margin-top: -70px;
+        margin-bottom: 50px;
     }
 `;
 
@@ -101,6 +155,7 @@ const Feedback = styled.div`
     background-color: #F7F7F7;
     padding: 4px 12px 12px 12px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    width: 65%;
     border-radius: 8px;
     h2 {
         font-size: 24px;
@@ -123,6 +178,22 @@ const Feedback = styled.div`
         font-size: 16px;
         cursor: pointer;
     }
+
+    @media screen and (max-width: 768px) {
+        width: 94%;
+        h2 {
+            font-size: 18px;
+        }
+        p {
+            margin-top: 4px;
+            font-size: 12px;
+        }
+        button {
+            font-size: 12px;
+            padding: 8px 12px;
+        }
+    
+    }
 `;
 
 const CommentBox = styled.div`
@@ -136,6 +207,13 @@ const CommentBox = styled.div`
         font-size: 16px;
         margin-bottom: 0;
     }
+    @media screen and (max-width: 768px) {
+        h2 {
+            font-family: 'League Spartan', sans-serif;
+            font-size: 16px;
+            margin: 30px 0 0 0;
+        }
+    }
 `;
 
 const Comment = styled.div`
@@ -146,6 +224,12 @@ const Comment = styled.div`
         font-size: 18px;
         margin-bottom: 10px;
     }
+    @media screen and (max-width: 768px) {
+        span {
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+    }
 `;
 
 const FullName = styled.h4`
@@ -153,12 +237,19 @@ const FullName = styled.h4`
   font-weight: 500;
   margin-bottom: 0;
   font-family: 'League Spartan', sans-serif;
+  @media screen and (max-width: 768px) {
+    font-size: 16px;
+  }
 `;
 
 const PostedDate = styled.h1`
   font-weight: 500;
   margin-bottom: 6px;
   font-size: 12px;
+  @media screen and (max-width: 768px) {
+    font-size: 10px;
+    margin-bottom: 2px;
+  }
 `;
 
 const CommentContainer = styled.div`
@@ -176,6 +267,20 @@ const CommentContainer = styled.div`
         border-radius: 4px;
         padding: 12px;
     }
+    @media screen and (max-width: 768px) {
+        p {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 0;
+        }
+        textarea {
+            height: 180px;
+            resize: none;
+            border: 1px solid #777;
+            border-radius: 4px;
+            padding: 4px;
+        }    
+    }
 `;
 
 const Label = styled.h2`
@@ -183,6 +288,9 @@ const Label = styled.h2`
     font-weight: normal;
     margin: 0;
     font-family: 'League Spartan', sans-serif;
+    @media screen and (max-width: 768px) {
+        font-size: 1.6rem;
+    }
 `;
 
 
@@ -201,14 +309,25 @@ const Info = styled.div`
     span{
         font-weight: 500;
     }
+    @media screen and (max-width: 768px) {
+        margin-bottom: 10px;
+        p{
+            font-size: 10px;
+        }
+        span{
+            font-size: 10px;
+        }
+    }
 
 `;
 
 const TextLabel = styled.h2`
-    font-size: 1.4rem;
+    font-size: 1rem;
     font-weight: bold;
     margin: 0;
     text-align: center;
+    @media screen and (max-width: 768px) {
+    }
 `;
 
 const List = styled.ul`
@@ -231,6 +350,9 @@ const ListItem = styled.li`
 
 const Name = styled.span`
     font-size: 14px;
+    @media screen and (max-width: 768px) {
+        font-size: 10px;
+    }
 `;
 
 const ProcedureContainer = styled.div`
@@ -242,6 +364,11 @@ const ProcedureStep = styled.div`
     margin: 0 10px;
     display: flex;
     gap: 10px;
+    @media screen and (max-width: 768px) {
+        flex-direction: column;
+        gap: 0;
+        margin: 0px;
+    }
 `;
 
 const Step = styled.p`
@@ -249,7 +376,9 @@ const Step = styled.p`
     flex: 1;
     font-style: italic;
     font-family: 'League Spartan', sans-serif;
-
+    @media screen and (max-width: 768px) {
+        margin-bottom: 4px;
+    }
 `;
 
 const Steps = styled.p`
@@ -257,6 +386,9 @@ const Steps = styled.p`
     text-align: justify;
     flex: 8;
     font-family: 'League Spartan', sans-serif;
+    @media screen and (max-width: 768px) {
+        margin: 0px;
+    }
 `;
 
 
@@ -303,12 +435,24 @@ const ServingsButton = styled.button`
     &:hover {
         background-color: #111;
     }
+
+    @media screen and (max-width: 768px) {\
+        height: 12px;
+        width: 12px;
+        svg {
+            width: 8px;
+            height: 8px;
+        }
+    }
 `;
 
 const ServingsLabel = styled.p`
     font-size: 14px;
     margin: 0px 16px 0px 0px;
     color: #333;
+    @media screen and (max-width: 768px) {
+        font-size: 10px;
+    }
 `;
 
 const SetContainer = styled.div`
@@ -320,6 +464,9 @@ const SetLabel = styled.p`
     font-size: 14px;
     margin: 0px;
     color: #333;
+    @media screen and (max-width: 768px) {
+        font-size: 10px;
+    }
 `;
 
 const CopyButton = styled.button`
@@ -355,12 +502,15 @@ const CopyButtonWrapper = styled.div`
 const ColumnWrapper = styled.div`
   display: flex;
   margin: 20px 0;
+  @media screen and (max-width: 768px) {
+    flex-direction: column;
+    margin: 0;
+  }
 `;
 
 const LeftColumn = styled.div`
   flex: 2;
   padding: 16px 16px 0 0 ;
-  position: relative;
 `;
 
 const RightColumn = styled.div`
@@ -383,10 +533,15 @@ const RecipeImage = styled.div`
 
   img {
     height: 100%;
-    width: auto; /* To maintain the aspect ratio */
-    max-width: 100%; /* Ensure the image doesn't exceed the container width */
+    width: auto;
+    max-width: 100%;
+  }
+
+  @media screen and (max-width: 768px) {
+    height: 200px;
   }
 `;
+
 
 
 const NavigationButton = styled.button`
@@ -419,6 +574,16 @@ const PreviousButton = styled(NavigationButton)`
     background-color: #111;
     left: 18px;
   }
+
+  @media screen and (max-width: 768px) {
+    left: 10px;
+    height: 30px;
+    width: 30px;
+    svg {
+        height: 18px;
+        width: 18px;
+    }
+  }
 `;
 
 const NextButton = styled(NavigationButton)`
@@ -440,6 +605,16 @@ const NextButton = styled(NavigationButton)`
     background-color: #111;
     right: 18px;
   }
+
+  @media screen and (max-width: 768px) {
+    right: 10px;
+    height: 30px;
+    width: 30px;
+    svg {
+        height: 18px;
+        width: 18px;
+    }
+  }
 `;
 
 const RatingsWrapper = styled.div`
@@ -447,12 +622,21 @@ const RatingsWrapper = styled.div`
   flex-direction: row;
   align-items: center;
   margin-top: 10px;
+  @media screen and (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: 4px;
+  }
 `;
 
 const AverageRating = styled.p`
   font-size: 16px;
   margin: 0 0 0px 8px;
   font-family: 'League Spartan', sans-serif;
+  @media screen and (max-width: 768px) {
+    margin: 0;
+    font-size: 14px;
+  }
 `;
 
 const Buttons = styled.div`
@@ -478,6 +662,9 @@ const Buttons = styled.div`
     svg {
         height: 18px;
         width: 18px;
+    }
+    @media screen and (max-width: 768px) {
+        margin: 10px 0;
     }
 }
 `;
@@ -511,8 +698,9 @@ export default function RecipePage({ recipe }) {
     const { data: session } = useSession();
     const [comments, setComments] = useState([]);
     const [newCommentText, setNewCommentText] = useState('');
-
-
+    const [isSideWindowOpen, setIsSideWindowOpen] = useState(false);
+    const [isFilterWindowOpen, setIsFilterWindowOpen] = useState(false);
+    const { bagRecipes } = useContext(BagContext);
 
     useEffect(() => {
         const fetchComments = async () => {
@@ -583,6 +771,19 @@ export default function RecipePage({ recipe }) {
         });
     }, [recipe._id]);
   
+    const toggleSideWindow = () => {
+        setIsSideWindowOpen(!isSideWindowOpen);
+      };
+    
+      const toggleFilterWindow = () => {
+        setIsFilterWindowOpen(!isFilterWindowOpen);
+      };
+    
+      const mainContentStyle = {
+        marginRight: isSideWindowOpen ? '400px' : '0',
+        transition: 'margin-right 0.5s',
+    };
+
     const handleRatingChange = (newRating) => {
       // Check if there is a valid session
       if (!session || !session.user || !session.user._id) {
@@ -734,105 +935,151 @@ export default function RecipePage({ recipe }) {
     ));
 
     return (
-        <PageWrapper>
-            <Header />
-            <Center>
-                <div>
-                    <ColumnWrapper>
-                        <LeftColumn>
-                            <CategoryWrapper>
-                                {categoryArray.map((cat, index) => (
-                                    <span key={cat._id}>
-                                        {index > 0 && ', '}
-                                        <Link href="/category/[categoryId]" as={`/category/${cat._id}`}>
-                                            {cat.name}
-                                        </Link>
-                                    </span>
-                                ))}
-                            </CategoryWrapper>
-                            <Title>{recipe.title}</Title>
-                            <RatingsWrapper>
-                                <StarRatings
-                                    rating={userRating}
-                                    starRatedColor="#FFC13B"
-                                    changeRating={handleRatingChange}
-                                    numberOfStars={5}
-                                    name="userRating"
-                                    starDimension="20px"
-                                    starSpacing="2px"
-                                />
-                                <AverageRating>
-                                Average {parseFloat(averageRating).toFixed(1)} / 5 out of {totalRatings} ratings
-                                </AverageRating>          
-                            </RatingsWrapper>
-                            <Buttons>
-                                <button onClick={() => addRecipe(recipe._id)}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                                        <path fillRule="evenodd" d="M6.32 2.577a49.255 49.255 0 0 1 11.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 0 1-1.085.67L12 18.089l-7.165 3.583A.75.75 0 0 1 3.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93Z" clipRule="evenodd" />
-                                    </svg>
-                                    Save
-                                </button>
-                                <ScrollLink to="videoContainer" smooth={true}>
-                                    <button>
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                                            <path d="M4.5 4.5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h8.25a3 3 0 0 0 3-3v-9a3 3 0 0 0-3-3H4.5ZM19.94 18.75l-2.69-2.69V7.94l2.69-2.69c.944-.945 2.56-.276 2.56 1.06v11.38c0 1.336-1.616 2.005-2.56 1.06Z" />
-                                        </svg>
-                                        Video
-                                    </button>
-                                </ScrollLink>
-                                <button onClick={generatePDF}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                                        <path fillRule="evenodd" d="M7.875 1.5C6.839 1.5 6 2.34 6 3.375v2.99c-.426.053-.851.11-1.274.174-1.454.218-2.476 1.483-2.476 2.917v6.294a3 3 0 0 0 3 3h.27l-.155 1.705A1.875 1.875 0 0 0 7.232 22.5h9.536a1.875 1.875 0 0 0 1.867-2.045l-.155-1.705h.27a3 3 0 0 0 3-3V9.456c0-1.434-1.022-2.7-2.476-2.917A48.716 48.716 0 0 0 18 6.366V3.375c0-1.036-.84-1.875-1.875-1.875h-8.25ZM16.5 6.205v-2.83A.375.375 0 0 0 16.125 3h-8.25a.375.375 0 0 0-.375.375v2.83a49.353 49.353 0 0 1 9 0Zm-.217 8.265c.178.018.317.16.333.337l.526 5.784a.375.375 0 0 1-.374.409H7.232a.375.375 0 0 1-.374-.409l.526-5.784a.373.373 0 0 1 .333-.337 41.741 41.741 0 0 1 8.566 0Zm.967-3.97a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H18a.75.75 0 0 1-.75-.75V10.5ZM15 9.75a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V10.5a.75.75 0 0 0-.75-.75H15Z" clipRule="evenodd" />
-                                    </svg>
-                                    Print
-                                </button>
-                            </Buttons>
-                            <Info>
-                                <p>By: <span>{recipe.citation}</span></p>
-                                <p>Posted: <span>{formattedCreatedAt}</span></p>
-                                {recipe.createdAt !== recipe.updatedAt && (
-                                    <p>Updated: <span>{formattedUpdatedAt}</span></p>
-                                )}
-                            </Info>
-                            <Description>{recipe.description}</Description>
-                            <RecipeImageContainer>
-                            <RecipeImage>
-                                <img src={recipe.images?.[activeImageIndex]} alt="" />
-                                {recipe.images.length > 1 && (
-                                <div>
-                                    <PreviousButton onClick={handlePrevImage}>{PreviousIcon}</PreviousButton>
-                                    <NextButton onClick={handleNextImage}>{NextIcon}</NextButton>
-                                </div>
-                                )}
-                            </RecipeImage>
-                            </RecipeImageContainer>
-
-                            {recipe.videoLink && (
-                                <VideoContainer id="videoContainer">
-                                    <TextLabel>How to Cook {recipe.title}</TextLabel>
-                                    <YouTube
-                                        videoId={recipe.videoLink}
-                                        opts={{ width: '100%', height: '400' }}
+        <div style={mainContentStyle}>
+            <PageWrapper>
+                <Header />
+                <Center>
+                    <div>
+                        <ColumnWrapper>
+                            <LeftColumn>
+                                <CategoryWrapper>
+                                    {categoryArray.map((cat, index) => (
+                                        <span key={cat._id}>
+                                            {index > 0 && ', '}
+                                            <Link href="/category/[categoryId]" as={`/category/${cat._id}`}>
+                                                {cat.name}
+                                            </Link>
+                                        </span>
+                                    ))}
+                                </CategoryWrapper>
+                                <Title>{recipe.title}</Title>
+                                <RatingsWrapper>
+                                    <StarRatings
+                                        rating={userRating}
+                                        starRatedColor="#FFC13B"
+                                        changeRating={handleRatingChange}
+                                        numberOfStars={5}
+                                        name="userRating"
+                                        starDimension="20px"
+                                        starSpacing="2px"
                                     />
-                                </VideoContainer>
-                            )}
-                            <div>
-                                <ProcedureContainer>
-                                    <TextLabel>Procedure</TextLabel>
-                                    {procedureSteps}
-                                </ProcedureContainer>
-                            </div>
+                                    <AverageRating>
+                                    Average {parseFloat(averageRating).toFixed(1)} / 5 out of {totalRatings} ratings
+                                    </AverageRating>          
+                                </RatingsWrapper>
+                                <Buttons>
+                                    <button onClick={() => addRecipe(recipe._id)}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                                            <path fillRule="evenodd" d="M6.32 2.577a49.255 49.255 0 0 1 11.36 0c1.497.174 2.57 1.46 2.57 2.93V21a.75.75 0 0 1-1.085.67L12 18.089l-7.165 3.583A.75.75 0 0 1 3.75 21V5.507c0-1.47 1.073-2.756 2.57-2.93Z" clipRule="evenodd" />
+                                        </svg>
+                                        Save
+                                    </button>
+                                    <ScrollLink to="videoContainer" smooth={true}>
+                                        <button>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                                                <path d="M4.5 4.5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h8.25a3 3 0 0 0 3-3v-9a3 3 0 0 0-3-3H4.5ZM19.94 18.75l-2.69-2.69V7.94l2.69-2.69c.944-.945 2.56-.276 2.56 1.06v11.38c0 1.336-1.616 2.005-2.56 1.06Z" />
+                                            </svg>
+                                            Video
+                                        </button>
+                                    </ScrollLink>
+                                    <button onClick={generatePDF}>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                                            <path fillRule="evenodd" d="M7.875 1.5C6.839 1.5 6 2.34 6 3.375v2.99c-.426.053-.851.11-1.274.174-1.454.218-2.476 1.483-2.476 2.917v6.294a3 3 0 0 0 3 3h.27l-.155 1.705A1.875 1.875 0 0 0 7.232 22.5h9.536a1.875 1.875 0 0 0 1.867-2.045l-.155-1.705h.27a3 3 0 0 0 3-3V9.456c0-1.434-1.022-2.7-2.476-2.917A48.716 48.716 0 0 0 18 6.366V3.375c0-1.036-.84-1.875-1.875-1.875h-8.25ZM16.5 6.205v-2.83A.375.375 0 0 0 16.125 3h-8.25a.375.375 0 0 0-.375.375v2.83a49.353 49.353 0 0 1 9 0Zm-.217 8.265c.178.018.317.16.333.337l.526 5.784a.375.375 0 0 1-.374.409H7.232a.375.375 0 0 1-.374-.409l.526-5.784a.373.373 0 0 1 .333-.337 41.741 41.741 0 0 1 8.566 0Zm.967-3.97a.75.75 0 0 1 .75-.75h.008a.75.75 0 0 1 .75.75v.008a.75.75 0 0 1-.75.75H18a.75.75 0 0 1-.75-.75V10.5ZM15 9.75a.75.75 0 0 0-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 0 0 .75-.75V10.5a.75.75 0 0 0-.75-.75H15Z" clipRule="evenodd" />
+                                        </svg>
+                                        Print
+                                    </button>
+                                </Buttons>
+                                <Info>
+                                    <p>By: <span>{recipe.citation}</span></p>
+                                    <p>Posted: <span>{formattedCreatedAt}</span></p>
+                                    {recipe.createdAt !== recipe.updatedAt && (
+                                        <p>Updated: <span>{formattedUpdatedAt}</span></p>
+                                    )}
+                                </Info>
+                                <Description>{recipe.description}</Description>
+                                <RecipeImageContainer>
+                                <RecipeImage>
+                                    <img src={recipe.images?.[activeImageIndex]} alt="" />
+                                    {recipe.images.length > 1 && (
+                                    <div>
+                                        <PreviousButton onClick={handlePrevImage}>{PreviousIcon}</PreviousButton>
+                                        <NextButton onClick={handleNextImage}>{NextIcon}</NextButton>
+                                    </div>
+                                    )}
+                                </RecipeImage>
+                                </RecipeImageContainer>
+
+                                {recipe.videoLink && (
+                                    <VideoContainer id="videoContainer">
+                                        <TextLabel>How to Cook {recipe.title}</TextLabel>
+                                        <YouTube
+                                            videoId={recipe.videoLink}
+                                            opts={{ width: '100%', height: '400' }}
+                                        />
+                                    </VideoContainer>
+                                )}
+                                <div>
+                                    <ProcedureContainer>
+                                        <TextLabel>Procedure</TextLabel>
+                                        {procedureSteps}
+                                    </ProcedureContainer>
+                                </div>
+                            </LeftColumn>
+                            <RightColumn>
+                                <IngredientsContainer>
+                                <Label>Ingredients</Label>
+                                <ServingsControls>
+                                    <ServingsLabel>Servings: {servings}</ServingsLabel>
+                                    <SetContainer>
+                                        <ServingsButton onClick={decreaseSets}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                                                <path fillRule="evenodd" d="M4 10a.75.75 0 01.75-.75h10.5a.75.75 0 010 1.5H4.75A.75.75 0 014 10z" clipRule="evenodd" />
+                                            </svg>
+                                            </ServingsButton>
+                                            <SetLabel>{sets} {sets === 1 ? 'set' : 'sets'}</SetLabel>
+                                            <ServingsButton onClick={increaseSets}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
+                                                <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                                            </svg>
+                                        </ServingsButton>
+                                    </SetContainer>
+                                </ServingsControls>
+                                {servingsChanged && (
+                                    <Message>
+                                        Please note that this recipe is originally designed for {originalServings} servings.
+                                        Adjust quantities and cooking times as needed for {servings} servings.
+                                    </Message>
+                                )}
+                                <List>
+                                        {updatedIngredients.map((ingredient, index) => (
+                                            <ListItem key={index}>
+                                                <Name>{ingredient.quantity} {ingredient.measurement}</Name>
+                                                <Name>{ingredient.name}</Name>
+                                            </ListItem>
+                                        ))}
+                                </List>
+                                </IngredientsContainer>
+                                
+                                <NutritionalValuesContainer>
+                                <Label>Nutritional Values</Label>
+                                <List>
+                                    <Name>{nutriValueList}</Name>
+                                </List>
+                            </NutritionalValuesContainer>
+                            </RightColumn>
+                        </ColumnWrapper>
+                        <FeedbackContainer>
                             <Feedback>
-                                <h2>Leave A Comment</h2>
-                                <p>Submit your question or comment below.</p>
-                                <CommentContainer>
-                                    <p>Comment*</p>
-                                    <textarea
+                            <h2>Leave A Comment</h2>
+                            <p>Submit your question or comment below.</p>
+                            <CommentContainer>
+                                <p>Comment*</p>
+                                <textarea
                                     value={newCommentText}
                                     onChange={e => setNewCommentText(e.target.value)}
                                     placeholder="Add your comment..."
-                                    />
-                                </CommentContainer>
+                                />
+                            </CommentContainer>
                                 <button onClick={handleAddComment}>Submit Comment</button>
                             </Feedback>
                             <CommentBox>
@@ -847,55 +1094,38 @@ export default function RecipePage({ recipe }) {
                                         </Comment>
                                     ))}
                             </CommentBox>
-                        </LeftColumn>
-                        <RightColumn>
-                            <IngredientsContainer>
-                            <Label>Ingredients</Label>
-                            <ServingsControls>
-                                <ServingsLabel>Servings: {servings}</ServingsLabel>
-                                <SetContainer>
-                                    <ServingsButton onClick={decreaseSets}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-                                            <path fillRule="evenodd" d="M4 10a.75.75 0 01.75-.75h10.5a.75.75 0 010 1.5H4.75A.75.75 0 014 10z" clipRule="evenodd" />
-                                        </svg>
-                                        </ServingsButton>
-                                        <SetLabel>{sets} {sets === 1 ? 'set' : 'sets'}</SetLabel>
-                                        <ServingsButton onClick={increaseSets}>
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-5 h-5">
-                                            <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
-                                        </svg>
-                                    </ServingsButton>
-                                </SetContainer>
-                            </ServingsControls>
-                            {servingsChanged && (
-                                <Message>
-                                    Please note that this recipe is originally designed for {originalServings} servings.
-                                    Adjust quantities and cooking times as needed for {servings} servings.
-                                </Message>
-                            )}
-                            <List>
-                                    {updatedIngredients.map((ingredient, index) => (
-                                        <ListItem key={index}>
-                                            <Name>{ingredient.quantity} {ingredient.measurement}</Name>
-                                            <Name>{ingredient.name}</Name>
-                                        </ListItem>
-                                    ))}
-                            </List>
-                            </IngredientsContainer>
-                            
-                            <NutritionalValuesContainer>
-                            <Label>Nutritional Values</Label>
-                            <List>
-                                <Name>{nutriValueList}</Name>
-                            </List>
-                        </NutritionalValuesContainer>
-                        </RightColumn>
-                    </ColumnWrapper>
-                </div>
-                <ScrollToTopButton />
-            </Center>
-            <Footer />
-        </PageWrapper>
+                        </FeedbackContainer>
+                    </div>
+                    <ScrollToTopButton />
+                </Center>
+                <Footer />
+            </PageWrapper>
+            <SideWindow isOpen={isSideWindowOpen} onClose={toggleSideWindow} />
+      {!isSideWindowOpen && (
+              <IconButtons
+              className="icon-button"
+              onClick={toggleSideWindow}
+              isSideWindowOpen={isSideWindowOpen}
+            >
+              {isSideWindowOpen ? (
+                <Icon xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                  <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm-1.72 6.97a.75.75 0 10-1.06 1.06L10.94 12l-1.72 1.72a.75.75 0 101.06 1.06L12 13.06l1.72 1.72a.75.75 0 101.06-1.06L13.06 12l1.72-1.72a.75.75 0 10-1.06-1.06L12 10.94l-1.72-1.72z" clipRule="evenodd" />
+                </Icon>
+                ) : (
+                <>
+                    {bagRecipes.length > 0 && (
+                      <BagLength>
+                        {bagRecipes.length}
+                      </BagLength>
+                    )}
+                  <Icon xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                    <path fillRule="evenodd" d="M7.5 6v.75H5.513c-.96 0-1.764.724-1.865 1.679l-1.263 12A1.875 1.875 0 004.25 22.5h15.5a1.875 1.875 0 001.865-2.071l-1.263-12a1.875 1.875 0 00-1.865-1.679H16.5V6a4.5 4.5 0 10-9 0zM12 3a3 3 0 00-3 3v.75h6V6a3 3 0 00-3-3zm-3 8.25a3 3 0 106 0v-.75a.75.75 0 011.5 0v.75a4.5 4.5 0 11-9 0v-.75a.75.75 0 011.5 0v.75z" clipRule="evenodd" />
+                  </Icon>
+                </>
+              )}
+            </IconButtons>
+        )}
+        </div>
     );
 }
 
